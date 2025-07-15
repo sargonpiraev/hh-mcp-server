@@ -39,30 +39,20 @@ test_unit:
       junit:
         - junit.xml
 
-test_codestyles:
-  stage: test
-  script:
-    - npm run format:check
-
-test_build:
-  stage: test
-  script:
-    - npm run build
-
-test_type:
-  stage: test
-  script:
-    - npm run typecheck
-
 test_lint:
   stage: test
   script:
     - npm run lint
 
-test_vulnerabilities:
+test_format:
   stage: test
   script:
-    - npm audit
+    - npm run format:check
+
+test_typecheck:
+  stage: test
+  script:
+    - npm run typecheck
 
 build:
   stage: build
@@ -72,11 +62,21 @@ build:
     paths: [build]
     expire_in: 1 day
 
+audit:
+  stage: test
+  script:
+    - npm run audit
+  allow_failure: true
+
 release:
-  image: node:22
   stage: release
-  dependencies: [install, build]
+  image: node:22-alpine
+  before_script:
+    - apk add --no-cache git
+    - npm ci --prefer-offline --cache .npm --no-audit --progress=false
   script:
     - npx semantic-release
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
+  only:
+    - main

@@ -2,26 +2,11 @@
   "name": "@sargonpiraev/hh-mcp-server",
   "version": "0.0.1",
   "description": "MCP Server for HeadHunter API - job search and vacancy management",
-  "keywords": [
-    "mcp",
-    "claude",
-    "ai",
-    "assistant",
-    "headhunter",
-    "job",
-    "search",
-    "vacancy",
-    "resume",
-    "career"
-  ],
+  "keywords": ["mcp", "claude", "ai", "assistant", "headhunter", "job", "search", "vacancy", "resume", "career"],
   "main": "./build/main.js",
   "types": "./build/main.d.ts",
   "type": "module",
-  "files": [
-    "build/",
-    "README.md",
-    "LICENSE"
-  ],
+  "files": ["build/", "README.md", "LICENSE"],
   "bin": {},
   "scripts": {
     "test": "jest --passWithNoTests --coverage",

@@ -2,4 +2,4 @@ node_modules
 build
 coverage
 junit.xml
-.DS_Store
+.env 
