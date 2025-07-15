@@ -1,11 +1,7 @@
 # HeadHunter MCP Server
 
 ![npm version](https://img.shields.io/npm/v/@sargonpiraev/hh-mcp-server)
-![npm downloads](https://img.shields.io/npm/dw/@sargonpiraev/hh-mcp-server)
-![license](https://img.shields.io/github/license/sargonpiraev/hh-mcp-server)
 ![smithery badge](https://smithery.ai/badge/@sargonpiraev/hh-mcp-server)
-![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-blue)
-[![Join Discord](https://img.shields.io/discord/1331631275464671347?color=7289da&label=Discord&logo=discord)](https://discord.gg/ZsWGxRGj)
 
 MCP Server for HeadHunter API - job search and vacancy management
 
