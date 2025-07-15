@@ -37,6 +37,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: install
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
     strategy:
       matrix:
         test-type: [unit, lint, format, typecheck, build, audit]
