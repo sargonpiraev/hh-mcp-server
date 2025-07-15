@@ -7,8 +7,12 @@
     [
       "@semantic-release/github",
       {
+        "assets": false,
+        "successComment": false,
         "failComment": false,
-        "successComment": false
+        "failTitle": false,
+        "labels": false,
+        "releasedLabels": false
       }
     ]
   ]
