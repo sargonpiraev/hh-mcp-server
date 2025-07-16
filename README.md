@@ -107,14 +107,14 @@ Add to your `claude_desktop_config.json`:
 
 ## Available Tools
 
-- **`get-vacancies`**: Execute get-vacancies operation
-- **`get-dictionaries`**: Execute get-dictionaries operation
-- **`get-areas`**: Execute get-areas operation
-- **`get-languages`**: Execute get-languages operation
-- **`get-industries`**: Execute get-industries operation
-- **`get-metro`**: Execute get-metro operation
-- **`get-professional-roles`**: Execute get-professional-roles operation
-- **`get-employers`**: Execute get-employers operation
+- **`get-vacancies`**: Search for vacancies
+- **`get-dictionaries`**: Directories of fields
+- **`get-areas`**: Tree view of all regions
+- **`get-languages`**: The list of all languages
+- **`get-industries`**: Industries
+- **`get-metro`**: The list of metro stations in all cities
+- **`get-professional-roles`**: Professional role directory
+- **`get-employers`**: Employer search
 
 **Total: 8 tools available** 🎯
 
