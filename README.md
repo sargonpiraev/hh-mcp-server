@@ -1,133 +1,65 @@
 # HeadHunter MCP Server
 
-![npm version](https://img.shields.io/npm/v/@sargonpiraev/hh-mcp-server)
-![smithery badge](https://smithery.ai/badge/@sargonpiraev/hh-mcp-server)
-
 MCP Server for HeadHunter API - job search and vacancy management
 
-## Features
+## Quick Start
 
-- 🔍 User Profile Management - View and manage your HeadHunter profile
-- 📄 Resume Management - View detailed resume information
-- 💼 Job Application Management - Manage negotiations and communications with employers
-- ⭐ Vacancy Search &amp; Favorites - Search for jobs and manage your favorites
-
-## Get Your Credentials
-
-Before installation, you'll need to obtain your API credentials:
-
-1. **HH_USER_AGENT**: User-Agent header for HeadHunter API requests (required by HH API)
-
-Save these credentials for the installation steps below.
-
-## Installation
-
-<details>
-<summary><b>Installing via Smithery</b></summary>
-
-To install HeadHunter MCP Server for any client automatically via [Smithery](https://smithery.ai):
+1. Install dependencies:
 
 ```bash
-npx -y @smithery/cli@latest install @sargonpiraev/hh-mcp-server --client <CLIENT_NAME>
+npm install
 ```
 
-</details>
+2. Set up environment:
 
-<details>
-<summary><b>Install in Cursor</b></summary>
+```bash
+cp .env.example .env
+# Edit .env with your API credentials
+```
 
-#### Cursor One-Click Installation
+3. Start the server:
 
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=@sargonpiraev/hh-mcp-server&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBzYXJnb25waXJhZXYvaGFiaXRpZnktbWNwLXNlcnZlciJdLCJlbnYiOnsiSEFCSVRJRllfQVBJX0tFWSI6InlvdXItaGFiaXRpZnktYXBpLWtleSJ9fQo=)
+```bash
+npm start
+```
 
-#### Manual Configuration
+## Configuration
 
-Add to your Cursor `~/.cursor/mcp.json` file:
+Add to your MCP client config:
 
 ```json
 {
   "mcpServers": {
     "hh-mcp-server": {
-      "command": "npx",
-      "args": ["-y", "@sargonpiraev/hh-mcp-server"],
+      "command": "node",
+      "args": ["/dist/index.js"],
       "env": {
-        "HH_USER_AGENT": "your-HH_USER_AGENT-here"
+        "HH_USER_AGENT": "your_hh_user_agent"
       }
     }
   }
 }
 ```
-
-</details>
-
-<details>
-<summary><b>Install in VS Code</b></summary>
-
-[![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_MCP-0098FF)](vscode:mcp/install?%7B%22name%22%3A%22hh-mcp-server%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22@sargonpiraev/hh-mcp-server%22%5D%7D)
-
-Or add manually to your VS Code settings:
-
-```json
-"mcp": {
-  "servers": {
-    "hh-mcp-server": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@sargonpiraev/hh-mcp-server"],
-      "env": {
-        "HH_USER_AGENT": "your-HH_USER_AGENT-here"
-      }
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary><b>Install in Claude Desktop</b></summary>
-
-Add to your `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "hh-mcp-server": {
-      "command": "npx",
-      "args": ["-y", "@sargonpiraev/hh-mcp-server"],
-      "env": {
-        "HH_USER_AGENT": "your-HH_USER_AGENT-here"
-      }
-    }
-  }
-}
-```
-
-</details>
 
 ## Available Tools
 
-- **`get-vacancies`**: Search for vacancies
-- **`get-dictionaries`**: Directories of fields
-- **`get-areas`**: Tree view of all regions
-- **`get-languages`**: The list of all languages
-- **`get-industries`**: Industries
-- **`get-metro`**: The list of metro stations in all cities
-- **`get-professional-roles`**: Professional role directory
-- **`get-employers`**: Employer search
+- **get-vacancies**: Search for vacancies
+- **get-dictionaries**: Directories of fields
+- **get-areas**: Tree view of all regions
+- **get-languages**: The list of all languages
+- **get-industries**: Industries
+- **get-metro**: The list of metro stations in all cities
+- **get-professional-roles**: Professional role directory
+- **get-employers**: Employer search
 
-**Total: 8 tools available** 🎯
+## Development
 
-## Support This Project
+```bash
+npm run build    # Build TypeScript
+npm run test     # Run tests
+npm run lint     # Check code style
+```
 
-Hi! I'm Sargon, a software engineer passionate about AI tools and automation. I create open-source MCP servers to help developers integrate AI assistants with their favorite services.
+## License
 
-Your support helps me continue developing and maintaining these tools, and motivates me to create new integrations that make AI assistants even more powerful! 🚀
-
-[![Support on Boosty](https://img.shields.io/badge/Support-Boosty-orange?logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K)](https://boosty.to/sargonpiraev)
-
-## Connect with Author
-
-- 🌐 Visit [sargonpiraev.com](https://sargonpiraev.com)
-- 📧 Email: [sargonpiraev@gmail.com](mailto:sargonpiraev@gmail.com)
-- 💬 Join [Discord](https://discord.gg/ZsWGxRGj)
+MIT
