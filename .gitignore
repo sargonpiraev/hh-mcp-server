@@ -3,3 +3,4 @@ build
 coverage
 junit.xml
 .env 
+node_modules

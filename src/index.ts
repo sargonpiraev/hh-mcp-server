@@ -36,20 +36,11 @@ const mcpServer = new McpServer(
 
 const logger = {
   log: (...message: (string | object)[]) =>
-    mcpServer.server.sendLoggingMessage({
-      level: 'info',
-      data: message.join(' '),
-    }),
+    mcpServer.server.sendLoggingMessage({ level: 'info', data: message.join(' ') }),
   error: (...message: (string | object)[]) =>
-    mcpServer.server.sendLoggingMessage({
-      level: 'error',
-      data: message.join(' '),
-    }),
+    mcpServer.server.sendLoggingMessage({ level: 'error', data: message.join(' ') }),
   debug: (...message: (string | object)[]) =>
-    mcpServer.server.sendLoggingMessage({
-      level: 'debug',
-      data: message.join(' '),
-    }),
+    mcpServer.server.sendLoggingMessage({ level: 'debug', data: message.join(' ') }),
 }
 
 // Axios client setup
