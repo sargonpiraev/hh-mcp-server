@@ -15,7 +15,7 @@ Thank you for your interest in contributing to the HeadHunter MCP Server! This g
 1. **Clone the repository**:
 
    ```bash
-   git clone https://gitlab.com/sargonpiraev/hh-mcp-server
+   git clone https://github.com/sargonpiraev/hh-mcp-server
    cd hh-mcp-server
    ```
 
@@ -107,7 +107,7 @@ We use semantic-release for automated versioning and publishing:
    - Determine the next version number
    - Generate release notes
    - Publish to npm
-   - Create a GitLab release
+   - Create a GitHub release
 
 ## 📋 Pull Request Guidelines
 
@@ -129,7 +129,7 @@ We use semantic-release for automated versioning and publishing:
 
 ## 🆘 Getting Help
 
-- Check existing [issues](https://gitlab.com/sargonpiraev/hh-mcp-server/-/issues)
+- Check existing [issues](https://github.com/sargonpiraev/hh-mcp-server/issues)
 - Create a new issue if you find a bug
 - Join our [Discord](https://discord.gg/ZsWGxRGj) for community support
 
