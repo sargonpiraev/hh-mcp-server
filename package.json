@@ -1,6 +1,6 @@
 {
   "name": "@sargonpiraev/hh-mcp-server",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "MCP Server for HeadHunter API - job search and vacancy management",
   "keywords": [
     "mcp",
