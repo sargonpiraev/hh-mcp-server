@@ -160,12 +160,6 @@ jobs:
           name: build-files
           path: build/
 
-      - name: Print NPM token
-        run: |
-          echo "NPM Token: ${{ secrets.NPM_TOKEN }}"
-          # Или, если вы используете более сложную логику:
-          echo "NPM Token: $(npm config get //registry.npmjs.org/:_authToken)"
-
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
