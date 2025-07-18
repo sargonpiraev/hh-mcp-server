@@ -5,6 +5,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod'
 import axios, { AxiosInstance } from 'axios'
 import dotenv from 'dotenv'
+import { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
 
 dotenv.config()
 
@@ -314,7 +315,7 @@ const logger = {
 }
 
 const apiClient: AxiosInstance = axios.create({
-  baseURL: '',
+  baseURL: 'https://api.hh.ru',
   headers: {
     Accept: 'application/json',
   },
@@ -331,6 +332,230 @@ apiClient.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error)
+  }
+)
+
+function handleResult(data: unknown): CallToolResult {
+  return {
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify(data, null, 2),
+      },
+    ],
+  }
+}
+
+function handleError(error: unknown): CallToolResult {
+  console.error(error)
+  logger.error('Error occurred:', JSON.stringify(error))
+
+  if (axios.isAxiosError(error)) {
+    const message = error.response?.data?.description || error.message
+    return {
+      isError: true,
+      content: [{ type: 'text', text: `API Error: ${message}` }],
+    } as CallToolResult
+  }
+
+  return {
+    isError: true,
+    content: [{ type: 'text', text: `Error: ${error}` }],
+  } as CallToolResult
+}
+
+mcpServer.tool('post-resume-phone-confirm', `Verify phone with a code`, {}, async (args) => {
+  try {
+    const response = await apiClient.post('/resume_phone_confirm', args)
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
+  }
+})
+
+mcpServer.tool(
+  'get-employers-managers-settings',
+  `Manager preferences`,
+  {
+    employer_id: z.string(),
+    manager_id: z.string(),
+  },
+  async (args) => {
+    try {
+      const { employer_id, manager_id, ...queryParams } = args
+      const url = `/employers/${employer_id}/managers/${manager_id}/settings`
+
+      const response = await apiClient.get(url, {
+        params: queryParams,
+      })
+      return handleResult(response.data)
+    } catch (error) {
+      return handleError(error)
+    }
+  }
+)
+
+mcpServer.tool(
+  'get-employers-managers-limits-resume',
+  `Daily limit of resume views for current manager`,
+  {
+    employer_id: z.string(),
+    manager_id: z.string(),
+  },
+  async (args) => {
+    try {
+      const { employer_id, manager_id, ...queryParams } = args
+      const url = `/employers/${employer_id}/managers/${manager_id}/limits/resume`
+
+      const response = await apiClient.get(url, {
+        params: queryParams,
+      })
+      return handleResult(response.data)
+    } catch (error) {
+      return handleError(error)
+    }
+  }
+)
+
+mcpServer.tool(
+  'get-employers-addresses',
+  `Directory of employer&#x27;s addresses`,
+  {
+    employer_id: z.string(),
+    changed_after: z.string().optional(),
+    manager_id: z.string().optional(),
+    with_manager: z.string().optional(),
+    per_page: z.string().optional(),
+    page: z.string().optional(),
+  },
+  async (args) => {
+    try {
+      const { employer_id, ...queryParams } = args
+      const url = `/employers/${employer_id}/addresses`
+
+      const response = await apiClient.get(url, {
+        params: queryParams,
+      })
+      return handleResult(response.data)
+    } catch (error) {
+      return handleError(error)
+    }
+  }
+)
+
+mcpServer.tool(
+  'get-employers-managers',
+  `Directory of employer&#x27;s managers`,
+  {
+    employer_id: z.string(),
+    page: z.string().optional(),
+    per_page: z.string().optional(),
+    search_text: z.string().optional(),
+  },
+  async (args) => {
+    try {
+      const { employer_id, ...queryParams } = args
+      const url = `/employers/${employer_id}/managers`
+
+      const response = await apiClient.get(url, {
+        params: queryParams,
+      })
+      return handleResult(response.data)
+    } catch (error) {
+      return handleError(error)
+    }
+  }
+)
+
+mcpServer.tool(
+  'post-employers-managers',
+  `Adding a manager`,
+  {
+    employer_id: z.string(),
+  },
+  async (args) => {
+    try {
+      const { employer_id, ...requestData } = args
+      const url = `/employers/${employer_id}/managers`
+
+      const response = await apiClient.post(url, requestData)
+      return handleResult(response.data)
+    } catch (error) {
+      return handleError(error)
+    }
+  }
+)
+
+mcpServer.tool(
+  'get-employers-manager-types',
+  `Directory of manager types and privileges`,
+  {
+    employer_id: z.string(),
+  },
+  async (args) => {
+    try {
+      const { employer_id, ...queryParams } = args
+      const url = `/employers/${employer_id}/manager_types`
+
+      const response = await apiClient.get(url, {
+        params: queryParams,
+      })
+      return handleResult(response.data)
+    } catch (error) {
+      return handleError(error)
+    }
+  }
+)
+
+mcpServer.tool('get-manager-accounts-mine', `Manager&#x27;s work accounts`, {}, async (args) => {
+  try {
+    const response = await apiClient.get('/manager_accounts/mine', {
+      params: args,
+    })
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
+  }
+})
+
+mcpServer.tool(
+  'get-resume-should-send-sms',
+  `Get information about the applicant&#x27;s phone number`,
+  {
+    phone: z.string(),
+  },
+  async (args) => {
+    try {
+      const response = await apiClient.get('/resume_should_send_sms', {
+        params: args,
+      })
+      return handleResult(response.data)
+    } catch (error) {
+      return handleError(error)
+    }
+  }
+)
+
+mcpServer.tool(
+  'get-employers-addresses',
+  `Get address by ID`,
+  {
+    employer_id: z.string(),
+    address_id: z.string(),
+    with_manager: z.string().optional(),
+  },
+  async (args) => {
+    try {
+      const { employer_id, address_id, ...queryParams } = args
+      const url = `/employers/${employer_id}/addresses/${address_id}`
+
+      const response = await apiClient.get(url, {
+        params: queryParams,
+      })
+      return handleResult(response.data)
+    } catch (error) {
+      return handleError(error)
+    }
   }
 )
 
