@@ -8,17 +8,20 @@
     "ai",
     "assistant"
   ],
-  "main": "./build/main.js",
-  "types": "./build/main.d.ts",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
   "type": "module",
   "files": [
     "build/",
     "README.md",
     "LICENSE"
   ],
+  "bin": {
+    "hh-mcp-server": "./build/index.js"
+  },
   "scripts": {
     "test": "jest --passWithNoTests --coverage",
-    "dev": "tsx watch ./src/main.ts",
+    "dev": "tsx watch ./src/index.ts",
     "build": "tsc -p tsconfig.json",
     "lint": "eslint ./src --ext .ts",
     "format": "prettier --write .",
@@ -27,7 +30,7 @@
     "commitlint": "commitlint --edit",
     "typecheck": "tsc --noEmit",
     "audit": "npm audit --omit=dev",
-    "inspect": "npx @modelcontextprotocol/inspector node ./build/main.js"
+    "inspect": "npx @modelcontextprotocol/inspector node ./build/index.js"
   },
   "engines": {
     "node": ">=18.0.0"
