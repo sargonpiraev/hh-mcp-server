@@ -7,7 +7,10 @@ import { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
 dotenv.config()
 
 export const envSchema = z.object({
-  HH_API_TOKEN: z.string(),
+  HH_CLIENT_ID: z.string(),
+  HH_CLIENT_SECRET: z.string(),
+  HH_USER_AGENT: z.string(),
+  HH_REDIRECT_URI: z.string(),
 })
 
 export const mcpServer = new McpServer(
@@ -29,68 +32,66 @@ export const env = envSchema.parse(process.env)
 export const apiClient: AxiosInstance = axios.create({
   baseURL: '',
   headers: {
-    'Accept': 'application/json'
+    Accept: 'application/json',
   },
-  timeout: 30000
+  timeout: 30000,
 })
 
-apiClient.interceptors.request.use((config) => {
-  if (env.HH_API_TOKEN) {
-    config.headers['Authorization'] = env.HH_API_TOKEN
+apiClient.interceptors.request.use(
+  (config) => {
+    if (env.HH_USER_AGENT) {
+      config.headers['HH-User-Agent'] = env.HH_USER_AGENT
+    }
+
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
   }
-  
-  return config
-}, (error) => {
-  return Promise.reject(error)
-})
+)
 
 function handleResult(data: unknown): CallToolResult {
   return {
-    content: [{ 
-      type: 'text', 
-      text: JSON.stringify(data, null, 2) 
-    }]
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify(data, null, 2),
+      },
+    ],
   }
 }
 
 function handleError(error: unknown): CallToolResult {
   console.error(error)
-  
+
   if (axios.isAxiosError(error)) {
     const message = error.response?.data?.message || error.message
-    return { 
-      isError: true, 
-      content: [{ type: 'text', text: `API Error: ${message}` }] 
+    return {
+      isError: true,
+      content: [{ type: 'text', text: `API Error: ${message}` }],
     } as CallToolResult
   }
-  
-  return { 
-    isError: true, 
-    content: [{ type: 'text', text: `Error: ${error}` }] 
+
+  return {
+    isError: true,
+    content: [{ type: 'text', text: `Error: ${error}` }],
   } as CallToolResult
 }
 
 // Register tools
-mcpServer.tool(
-  'confirm-phone-in-resume',
-  `Verify phone with a code`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'POST',
-        url: '/resume_phone_confirm',
-        data: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+mcpServer.tool('confirm-phone-in-resume', `Verify phone with a code`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'POST',
+      url: '/resume_phone_confirm',
+      data: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
 mcpServer.tool(
   'get-manager-settings',
@@ -103,13 +104,13 @@ mcpServer.tool(
     try {
       const { employer_id, manager_id, ...queryParams } = args
       const url = `/employers/${employer_id}/managers/${manager_id}/settings`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -128,13 +129,13 @@ mcpServer.tool(
     try {
       const { employer_id, manager_id, ...queryParams } = args
       const url = `/employers/${employer_id}/managers/${manager_id}/limits/resume`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -157,13 +158,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...queryParams } = args
       const url = `/employers/${employer_id}/addresses`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -184,13 +185,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...queryParams } = args
       const url = `/employers/${employer_id}/managers`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -208,13 +209,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...requestData } = args
       const url = `/employers/${employer_id}/managers`
-      
+
       const response = await apiClient.request({
         method: 'POST',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -232,13 +233,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...queryParams } = args
       const url = `/employers/${employer_id}/manager_types`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -246,26 +247,19 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'get-manager-accounts',
-  `Manager&#x27;s work accounts`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/manager_accounts/mine',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+mcpServer.tool('get-manager-accounts', `Manager&#x27;s work accounts`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/manager_accounts/mine',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
 mcpServer.tool(
   'get-applicant-phone-info',
@@ -275,13 +269,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/resume_should_send_sms',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -301,13 +294,13 @@ mcpServer.tool(
     try {
       const { employer_id, address_id, ...queryParams } = args
       const url = `/employers/${employer_id}/addresses/${address_id}`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -326,13 +319,13 @@ mcpServer.tool(
     try {
       const { employer_id, manager_id, ...requestData } = args
       const url = `/employers/${employer_id}/managers/${manager_id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -351,13 +344,13 @@ mcpServer.tool(
     try {
       const { employer_id, manager_id, ...queryParams } = args
       const url = `/employers/${employer_id}/managers/${manager_id}`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -377,13 +370,13 @@ mcpServer.tool(
     try {
       const { employer_id, manager_id, ...queryParams } = args
       const url = `/employers/${employer_id}/managers/${manager_id}`
-      
+
       const response = await apiClient.request({
         method: 'DELETE',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -394,17 +387,15 @@ mcpServer.tool(
 mcpServer.tool(
   'send-code-for-verify-phone-in-resume',
   `Send verification code to the phone number on CV`,
-  {
-  },
+  {},
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'POST',
         url: '/resume_phone_generate_code',
-        data: args
+        data: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -412,131 +403,89 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'authorize',
-  `Getting an access-token`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'POST',
-        url: '/oauth/token',
-        data: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
-  }
-)
+mcpServer.tool('authorize', `Getting an access-token`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'POST',
+      url: '/oauth/token',
+      data: args,
+    })
 
-mcpServer.tool(
-  'invalidate-token',
-  `Access token invalidation`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'DELETE',
-        url: '/oauth/token',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
-mcpServer.tool(
-  'get-current-user-info',
-  `Info on current authorized user`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/me',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
-  }
-)
+mcpServer.tool('invalidate-token', `Access token invalidation`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'DELETE',
+      url: '/oauth/token',
+      params: args,
+    })
 
-mcpServer.tool(
-  'edit-current-user-info',
-  `Editing information on the authorized user`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'POST',
-        url: '/me',
-        data: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
-mcpServer.tool(
-  'get-locales-for-resume',
-  `The list of available resume locales`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/locales/resume',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
-  }
-)
+mcpServer.tool('get-current-user-info', `Info on current authorized user`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/me',
+      params: args,
+    })
 
-mcpServer.tool(
-  'get-locales',
-  `The list of available locales`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/locales',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
+
+mcpServer.tool('edit-current-user-info', `Editing information on the authorized user`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'POST',
+      url: '/me',
+      data: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
+  }
+})
+
+mcpServer.tool('get-locales-for-resume', `The list of available resume locales`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/locales/resume',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
+  }
+})
+
+mcpServer.tool('get-locales', `The list of available locales`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/locales',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
+  }
+})
 
 mcpServer.tool(
   'get-positions-suggestions',
@@ -546,13 +495,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/suggests/positions',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -568,13 +516,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/suggests/educational_institutions',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -591,13 +538,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/suggests/area_leaves',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -613,13 +559,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/suggests/skill_set',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -635,13 +580,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/suggests/vacancy_positions',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -657,13 +601,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/suggests/professional_roles',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -679,13 +622,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/suggests/resume_search_keyword',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -703,13 +645,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/suggests/areas',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -725,13 +666,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/suggests/vacancy_search_keyword',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -747,13 +687,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/suggests/fields_of_study',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -769,13 +708,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/suggests/companies',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -793,13 +731,13 @@ mcpServer.tool(
     try {
       const { resume_id, ...queryParams } = args
       const url = `/resume_profile/${resume_id}`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -817,13 +755,13 @@ mcpServer.tool(
     try {
       const { resume_id, ...requestData } = args
       const url = `/resume_profile/${resume_id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -831,47 +769,33 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'create-resume-profile',
-  `Создание резюме-профиля соискателя`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'POST',
-        url: '/resume_profile',
-        data: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
-  }
-)
+mcpServer.tool('create-resume-profile', `Создание резюме-профиля соискателя`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'POST',
+      url: '/resume_profile',
+      data: args,
+    })
 
-mcpServer.tool(
-  'get-resume-profile-dictionaries',
-  `Получение cловарей резюме-профиля`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/resume_profile/dictionaries',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
+
+mcpServer.tool('get-resume-profile-dictionaries', `Получение cловарей резюме-профиля`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/resume_profile/dictionaries',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
+  }
+})
 
 mcpServer.tool(
   'get-payable-api-actions',
@@ -883,13 +807,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...queryParams } = args
       const url = `/employers/${employer_id}/services/payable_api_actions/active`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -908,13 +832,13 @@ mcpServer.tool(
     try {
       const { employer_id, manager_id, ...queryParams } = args
       const url = `/employers/${employer_id}/managers/${manager_id}/method_access`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -931,13 +855,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/saved_searches/vacancies',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -985,13 +908,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'POST',
         url: '/saved_searches/vacancies',
-        data: args
+        data: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1011,13 +933,13 @@ mcpServer.tool(
     try {
       const { vacancy_id, ...queryParams } = args
       const url = `/vacancies/${vacancy_id}/visitors`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1035,13 +957,13 @@ mcpServer.tool(
     try {
       const { vacancy_id, ...queryParams } = args
       const url = `/vacancies/${vacancy_id}`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1061,13 +983,13 @@ mcpServer.tool(
     try {
       const { vacancy_id, ...requestData } = args
       const url = `/vacancies/${vacancy_id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1075,26 +997,19 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'get-blacklisted-vacancies',
-  `List of hidden vacancies`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/vacancies/blacklisted',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+mcpServer.tool('get-blacklisted-vacancies', `List of hidden vacancies`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/vacancies/blacklisted',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
 mcpServer.tool(
   'publish-vacancy',
@@ -1104,13 +1019,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'POST',
         url: '/vacancies',
-        data: args
+        data: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1164,13 +1078,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/vacancies',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1221,13 +1134,13 @@ mcpServer.tool(
     try {
       const { vacancy_id, ...queryParams } = args
       const url = `/vacancies/${vacancy_id}/related_vacancies`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1245,13 +1158,13 @@ mcpServer.tool(
     try {
       const { id, ...queryParams } = args
       const url = `/saved_searches/vacancies/${id}`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1271,13 +1184,13 @@ mcpServer.tool(
     try {
       const { id, ...requestData } = args
       const url = `/saved_searches/vacancies/${id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1295,13 +1208,13 @@ mcpServer.tool(
     try {
       const { id, ...queryParams } = args
       const url = `/saved_searches/vacancies/${id}`
-      
+
       const response = await apiClient.request({
         method: 'DELETE',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1352,13 +1265,13 @@ mcpServer.tool(
     try {
       const { vacancy_id, ...queryParams } = args
       const url = `/vacancies/${vacancy_id}/similar_vacancies`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1376,13 +1289,13 @@ mcpServer.tool(
     try {
       const { vacancy_id, ...queryParams } = args
       const url = `/vacancies/${vacancy_id}/upgrades`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1433,13 +1346,13 @@ mcpServer.tool(
     try {
       const { resume_id, ...queryParams } = args
       const url = `/resumes/${resume_id}/similar_vacancies`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1456,13 +1369,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/vacancies/favorited',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1480,13 +1392,13 @@ mcpServer.tool(
     try {
       const { vacancy_id, ...requestData } = args
       const url = `/vacancies/blacklisted/${vacancy_id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1504,13 +1416,13 @@ mcpServer.tool(
     try {
       const { vacancy_id, ...queryParams } = args
       const url = `/vacancies/blacklisted/${vacancy_id}`
-      
+
       const response = await apiClient.request({
         method: 'DELETE',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1535,13 +1447,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...queryParams } = args
       const url = `/employers/${employer_id}/vacancies/active`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1563,13 +1475,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...queryParams } = args
       const url = `/employers/${employer_id}/vacancies/hidden`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1588,13 +1500,13 @@ mcpServer.tool(
     try {
       const { employer_id, vacancy_id, ...requestData } = args
       const url = `/employers/${employer_id}/vacancies/hidden/${vacancy_id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1613,13 +1525,13 @@ mcpServer.tool(
     try {
       const { employer_id, vacancy_id, ...queryParams } = args
       const url = `/employers/${employer_id}/vacancies/hidden/${vacancy_id}`
-      
+
       const response = await apiClient.request({
         method: 'DELETE',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1630,17 +1542,15 @@ mcpServer.tool(
 mcpServer.tool(
   'get-vacancy-conditions',
   `Conditions for filling out fields when publishing and editing vacancies`,
-  {
-  },
+  {},
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/vacancy_conditions',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1658,13 +1568,13 @@ mcpServer.tool(
     try {
       const { vacancy_id, ...queryParams } = args
       const url = `/vacancies/${vacancy_id}/prolongate`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1682,13 +1592,13 @@ mcpServer.tool(
     try {
       const { vacancy_id, ...requestData } = args
       const url = `/vacancies/${vacancy_id}/prolongate`
-      
+
       const response = await apiClient.request({
         method: 'POST',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1707,13 +1617,13 @@ mcpServer.tool(
     try {
       const { employer_id, vacancy_id, ...requestData } = args
       const url = `/employers/${employer_id}/vacancies/archived/${vacancy_id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1731,13 +1641,13 @@ mcpServer.tool(
     try {
       const { id, ...queryParams } = args
       const url = `/vacancies/${id}/preferred_negotiations_order`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1755,13 +1665,13 @@ mcpServer.tool(
     try {
       const { id, ...requestData } = args
       const url = `/vacancies/${id}/preferred_negotiations_order`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1779,13 +1689,13 @@ mcpServer.tool(
     try {
       const { vacancy_id, ...requestData } = args
       const url = `/vacancies/favorited/${vacancy_id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1803,13 +1713,13 @@ mcpServer.tool(
     try {
       const { vacancy_id, ...queryParams } = args
       const url = `/vacancies/favorited/${vacancy_id}`
-      
+
       const response = await apiClient.request({
         method: 'DELETE',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1828,13 +1738,13 @@ mcpServer.tool(
     try {
       const { employer_id, manager_id, ...queryParams } = args
       const url = `/employers/${employer_id}/managers/${manager_id}/vacancies/available_types`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1852,13 +1762,13 @@ mcpServer.tool(
     try {
       const { vacancy_id, ...queryParams } = args
       const url = `/vacancies/${vacancy_id}/stats`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1880,13 +1790,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...queryParams } = args
       const url = `/employers/${employer_id}/vacancies/archived`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1894,26 +1804,19 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'get-artifacts-portfolio-conditions',
-  `Conditions for uploading portfolio`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/artifacts/portfolio/conditions',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+mcpServer.tool('get-artifacts-portfolio-conditions', `Conditions for uploading portfolio`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/artifacts/portfolio/conditions',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
 mcpServer.tool(
   'edit-artifact',
@@ -1925,13 +1828,13 @@ mcpServer.tool(
     try {
       const { id, ...requestData } = args
       const url = `/artifacts/${id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1949,13 +1852,13 @@ mcpServer.tool(
     try {
       const { id, ...queryParams } = args
       const url = `/artifacts/${id}`
-      
+
       const response = await apiClient.request({
         method: 'DELETE',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -1963,131 +1866,89 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'load-artifact',
-  `Uploading an artifact`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'POST',
-        url: '/artifacts',
-        data: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
-  }
-)
+mcpServer.tool('load-artifact', `Uploading an artifact`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'POST',
+      url: '/artifacts',
+      data: args,
+    })
 
-mcpServer.tool(
-  'get-artifacts-portfolio',
-  `Getting portfolios`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/artifacts/portfolio',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
-mcpServer.tool(
-  'get-artifact-photos-conditions',
-  `Conditions for uploading photos`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/artifacts/photo/conditions',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
-  }
-)
+mcpServer.tool('get-artifacts-portfolio', `Getting portfolios`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/artifacts/portfolio',
+      params: args,
+    })
 
-mcpServer.tool(
-  'get-artifact-photos',
-  `Getting photos`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/artifacts/photo',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
-mcpServer.tool(
-  'get-dictionaries',
-  `Directories of fields`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/dictionaries',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
-  }
-)
+mcpServer.tool('get-artifact-photos-conditions', `Conditions for uploading photos`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/artifacts/photo/conditions',
+      params: args,
+    })
 
-mcpServer.tool(
-  'get-languages',
-  `The list of all languages`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/languages',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
+
+mcpServer.tool('get-artifact-photos', `Getting photos`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/artifacts/photo',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
+  }
+})
+
+mcpServer.tool('get-dictionaries', `Directories of fields`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/dictionaries',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
+  }
+})
+
+mcpServer.tool('get-languages', `The list of all languages`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/languages',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
+  }
+})
 
 mcpServer.tool(
   'get-educational-institutions-dictionary',
@@ -2097,13 +1958,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/educational_institutions',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2119,13 +1979,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/skills',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2133,26 +1992,19 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'get-professional-roles-dictionary',
-  `Professional role directory`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/professional_roles',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+mcpServer.tool('get-professional-roles-dictionary', `Professional role directory`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/professional_roles',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
 mcpServer.tool(
   'get-faculties',
@@ -2164,13 +2016,13 @@ mcpServer.tool(
     try {
       const { id, ...queryParams } = args
       const url = `/educational_institutions/${id}/faculties`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2178,26 +2030,19 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'get-industries',
-  `Industries`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/industries',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+mcpServer.tool('get-industries', `Industries`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/industries',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
 mcpServer.tool(
   'change-negotiation-action',
@@ -2210,13 +2055,13 @@ mcpServer.tool(
     try {
       const { collection_name, nid, ...requestData } = args
       const url = `/negotiations/${collection_name}/${nid}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2224,26 +2069,19 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'apply-to-vacancy',
-  `Apply for a vacancy`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'POST',
-        url: '/negotiations',
-        data: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+mcpServer.tool('apply-to-vacancy', `Apply for a vacancy`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'POST',
+      url: '/negotiations',
+      data: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
 mcpServer.tool(
   'get-negotiations',
@@ -2261,13 +2099,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/negotiations',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2286,13 +2123,13 @@ mcpServer.tool(
     try {
       const { employer_id, manager_id, ...queryParams } = args
       const url = `/employers/${employer_id}/managers/${manager_id}/negotiations_statistics`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2314,13 +2151,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/negotiations/active',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2341,13 +2177,13 @@ mcpServer.tool(
     try {
       const { template, ...queryParams } = args
       const url = `/message_templates/${template}`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2385,13 +2221,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/negotiations/response',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2399,26 +2234,19 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'invite-applicant-to-vacancy',
-  `Invite applicant for a vacancy`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'POST',
-        url: '/negotiations/phone_interview',
-        data: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+mcpServer.tool('invite-applicant-to-vacancy', `Invite applicant for a vacancy`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'POST',
+      url: '/negotiations/phone_interview',
+      data: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
 mcpServer.tool(
   'get-negotiation-test-results',
@@ -2430,13 +2258,13 @@ mcpServer.tool(
     try {
       const { nid, ...queryParams } = args
       const url = `/negotiations/${nid}/test/solution`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2455,13 +2283,13 @@ mcpServer.tool(
     try {
       const { nid, mid, ...requestData } = args
       const url = `/negotiations/${nid}/messages/${mid}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2469,26 +2297,19 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'post-negotiations-topics-read',
-  `Mark responses as read`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'POST',
-        url: '/negotiations/read',
-        data: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+mcpServer.tool('post-negotiations-topics-read', `Mark responses as read`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'POST',
+      url: '/negotiations/read',
+      data: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
 mcpServer.tool(
   'hide-active-response',
@@ -2501,13 +2322,13 @@ mcpServer.tool(
     try {
       const { nid, ...queryParams } = args
       const url = `/negotiations/active/${nid}`
-      
+
       const response = await apiClient.request({
         method: 'DELETE',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2525,13 +2346,13 @@ mcpServer.tool(
     try {
       const { id, ...queryParams } = args
       const url = `/negotiations/${id}`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2549,13 +2370,13 @@ mcpServer.tool(
     try {
       const { id, ...requestData } = args
       const url = `/negotiations/${id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2573,13 +2394,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...queryParams } = args
       const url = `/employers/${employer_id}/negotiations_statistics`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2597,13 +2418,13 @@ mcpServer.tool(
     try {
       const { nid, ...requestData } = args
       const url = `/negotiations/${nid}/messages`
-      
+
       const response = await apiClient.request({
         method: 'POST',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2622,13 +2443,13 @@ mcpServer.tool(
     try {
       const { nid, ...queryParams } = args
       const url = `/negotiations/${nid}/messages`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2646,13 +2467,13 @@ mcpServer.tool(
     try {
       const { draft_id, ...queryParams } = args
       const url = `/vacancies/drafts/${draft_id}`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2670,13 +2491,13 @@ mcpServer.tool(
     try {
       const { draft_id, ...requestData } = args
       const url = `/vacancies/drafts/${draft_id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2694,13 +2515,13 @@ mcpServer.tool(
     try {
       const { draft_id, ...queryParams } = args
       const url = `/vacancies/drafts/${draft_id}`
-      
+
       const response = await apiClient.request({
         method: 'DELETE',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2718,13 +2539,13 @@ mcpServer.tool(
     try {
       const { draft_id, ...requestData } = args
       const url = `/vacancies/drafts/${draft_id}/publish`
-      
+
       const response = await apiClient.request({
         method: 'POST',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2742,13 +2563,13 @@ mcpServer.tool(
     try {
       const { draft_id, ...queryParams } = args
       const url = `/vacancies/drafts/${draft_id}/duplicates`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2756,26 +2577,19 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'create-vacancy-draft',
-  `Creating vacancy draft`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'POST',
-        url: '/vacancies/drafts',
-        data: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+mcpServer.tool('create-vacancy-draft', `Creating vacancy draft`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'POST',
+      url: '/vacancies/drafts',
+      data: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
 mcpServer.tool(
   'get-vacancy-draft-list',
@@ -2786,13 +2600,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/vacancies/drafts',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2808,13 +2621,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'DELETE',
         url: '/vacancies/auto_publication',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2832,13 +2644,13 @@ mcpServer.tool(
     try {
       const { subscription_id, ...requestData } = args
       const url = `/webhook/subscriptions/${subscription_id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2856,13 +2668,13 @@ mcpServer.tool(
     try {
       const { subscription_id, ...queryParams } = args
       const url = `/webhook/subscriptions/${subscription_id}`
-      
+
       const response = await apiClient.request({
         method: 'DELETE',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2870,41 +2682,32 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'post-webhook-subscription',
-  `Subscription to notifications`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'POST',
-        url: '/webhook/subscriptions',
-        data: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+mcpServer.tool('post-webhook-subscription', `Subscription to notifications`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'POST',
+      url: '/webhook/subscriptions',
+      data: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
 mcpServer.tool(
   'get-webhook-subscriptions',
   `Obtain the list of notifications that the user is subscripted`,
-  {
-  },
+  {},
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/webhook/subscriptions',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2922,13 +2725,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...queryParams } = args
       const url = `/employers/${employer_id}/tests`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2946,13 +2749,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...queryParams } = args
       const url = `/employers/${employer_id}/vacancy_areas/active`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2970,13 +2773,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...queryParams } = args
       const url = `/employers/${employer_id}`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -2994,13 +2797,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...requestData } = args
       const url = `/employers/blacklisted/${employer_id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3018,13 +2821,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...queryParams } = args
       const url = `/employers/blacklisted/${employer_id}`
-      
+
       const response = await apiClient.request({
         method: 'DELETE',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3046,13 +2849,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/employers',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3070,13 +2872,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...queryParams } = args
       const url = `/employers/${employer_id}/departments`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3094,13 +2896,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...queryParams } = args
       const url = `/employers/${employer_id}/vacancy_branded_templates`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3108,47 +2910,33 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'get-blacklisted-employers',
-  `List of hidden employers`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/employers/blacklisted',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
-  }
-)
+mcpServer.tool('get-blacklisted-employers', `List of hidden employers`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/employers/blacklisted',
+      params: args,
+    })
 
-mcpServer.tool(
-  'get-all-districts',
-  `List of available city districts`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/districts',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
+
+mcpServer.tool('get-all-districts', `List of available city districts`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/districts',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
+  }
+})
 
 mcpServer.tool(
   'get-salary-evaluation',
@@ -3166,13 +2954,13 @@ mcpServer.tool(
     try {
       const { area_id, ...queryParams } = args
       const url = `/salary_statistics/paid/salary_evaluation/${area_id}`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3180,26 +2968,19 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'get-metro-stations',
-  `The list of metro stations in all cities`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/metro',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+mcpServer.tool('get-metro-stations', `The list of metro stations in all cities`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/metro',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
 mcpServer.tool(
   'get-metro-stations-in-city',
@@ -3211,13 +2992,13 @@ mcpServer.tool(
     try {
       const { city_id, ...queryParams } = args
       const url = `/metro/${city_id}`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3236,13 +3017,13 @@ mcpServer.tool(
     try {
       const { saved_search_id, manager_id, ...requestData } = args
       const url = `/saved_searches/resumes/${saved_search_id}/managers/${manager_id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3260,13 +3041,13 @@ mcpServer.tool(
     try {
       const { vacancy_id, ...queryParams } = args
       const url = `/vacancies/${vacancy_id}/resumes_by_status`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3284,13 +3065,13 @@ mcpServer.tool(
     try {
       const { resume_id, ...queryParams } = args
       const url = `/resumes/${resume_id}/status`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3308,13 +3089,13 @@ mcpServer.tool(
     try {
       const { resume_id, ...queryParams } = args
       const url = `/resumes/${resume_id}/negotiations_history`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3332,13 +3113,13 @@ mcpServer.tool(
     try {
       const { id, ...queryParams } = args
       const url = `/saved_searches/resumes/${id}`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3358,13 +3139,13 @@ mcpServer.tool(
     try {
       const { id, ...requestData } = args
       const url = `/saved_searches/resumes/${id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3382,13 +3163,13 @@ mcpServer.tool(
     try {
       const { id, ...queryParams } = args
       const url = `/saved_searches/resumes/${id}`
-      
+
       const response = await apiClient.request({
         method: 'DELETE',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3404,13 +3185,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'POST',
         url: '/resumes',
-        data: args
+        data: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3423,11 +3203,11 @@ mcpServer.tool(
   `Resume search`,
   {
     text: z.string().optional(),
-    text.logic: z.string().optional(),
-    text.field: z.string().optional(),
-    text.period: z.string().optional(),
-    text.company_size: z.string().optional(),
-    text.industry: z.string().optional(),
+    text_logic: z.string().optional(),
+    text_field: z.string().optional(),
+    text_period: z.string().optional(),
+    text_company_size: z.string().optional(),
+    text_industry: z.string().optional(),
     age_from: z.string().optional(),
     age_to: z.string().optional(),
     area: z.string().optional(),
@@ -3474,13 +3254,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/resumes',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3488,26 +3267,19 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'get-mine-resumes',
-  `List of resumes for current user`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/resumes/mine',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+mcpServer.tool('get-mine-resumes', `List of resumes for current user`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/resumes/mine',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
 mcpServer.tool(
   'publish-resume',
@@ -3519,13 +3291,13 @@ mcpServer.tool(
     try {
       const { resume_id, ...requestData } = args
       const url = `/resumes/${resume_id}/publish`
-      
+
       const response = await apiClient.request({
         method: 'POST',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3533,26 +3305,19 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'get-new-resume-conditions',
-  `Conditions to fill in the fields of a new resume`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/resume_conditions',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+mcpServer.tool('get-new-resume-conditions', `Conditions to fill in the fields of a new resume`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/resume_conditions',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
 mcpServer.tool(
   'get-suitable-resumes',
@@ -3564,13 +3329,13 @@ mcpServer.tool(
     try {
       const { vacancy_id, ...queryParams } = args
       const url = `/vacancies/${vacancy_id}/suitable_resumes`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3588,13 +3353,13 @@ mcpServer.tool(
     try {
       const { resume_id, ...queryParams } = args
       const url = `/resumes/${resume_id}/conditions`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3613,13 +3378,13 @@ mcpServer.tool(
     try {
       const { resume_id, ...queryParams } = args
       const url = `/resumes/${resume_id}/views`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3640,13 +3405,13 @@ mcpServer.tool(
     try {
       const { resume_id, ...queryParams } = args
       const url = `/resumes/${resume_id}`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3664,13 +3429,13 @@ mcpServer.tool(
     try {
       const { resume_id, ...queryParams } = args
       const url = `/resumes/${resume_id}`
-      
+
       const response = await apiClient.request({
         method: 'DELETE',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3688,13 +3453,13 @@ mcpServer.tool(
     try {
       const { resume_id, ...requestData } = args
       const url = `/resumes/${resume_id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3702,26 +3467,19 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'get-resume-creation-availability',
-  `Availability of resume creation`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/resumes/creation_availability',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+mcpServer.tool('get-resume-creation-availability', `Availability of resume creation`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/resumes/creation_availability',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
 mcpServer.tool(
   'get-saved-resume-searches',
@@ -3732,13 +3490,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/saved_searches/resumes',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3751,9 +3508,9 @@ mcpServer.tool(
   `Creating new saved resumes search`,
   {
     text: z.string().optional(),
-    text.logic: z.string().optional(),
-    text.field: z.string().optional(),
-    text.period: z.string().optional(),
+    text_logic: z.string().optional(),
+    text_field: z.string().optional(),
+    text_period: z.string().optional(),
     age_from: z.string().optional(),
     age_to: z.string().optional(),
     area: z.string().optional(),
@@ -3787,13 +3544,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'POST',
         url: '/saved_searches/resumes',
-        data: args
+        data: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3811,13 +3567,13 @@ mcpServer.tool(
     try {
       const { resume_id, ...queryParams } = args
       const url = `/resumes/${resume_id}/access_types`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3836,13 +3592,13 @@ mcpServer.tool(
     try {
       const { applicant_id, comment_id, ...requestData } = args
       const url = `/applicant_comments/${applicant_id}/${comment_id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3861,13 +3617,13 @@ mcpServer.tool(
     try {
       const { applicant_id, comment_id, ...queryParams } = args
       const url = `/applicant_comments/${applicant_id}/${comment_id}`
-      
+
       const response = await apiClient.request({
         method: 'DELETE',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3888,13 +3644,13 @@ mcpServer.tool(
     try {
       const { applicant_id, ...queryParams } = args
       const url = `/applicant_comments/${applicant_id}`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3912,13 +3668,13 @@ mcpServer.tool(
     try {
       const { applicant_id, ...requestData } = args
       const url = `/applicant_comments/${applicant_id}`
-      
+
       const response = await apiClient.request({
         method: 'POST',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3937,13 +3693,13 @@ mcpServer.tool(
     try {
       const { employer_id, template_id, ...requestData } = args
       const url = `/employers/${employer_id}/mail_templates/${template_id}`
-      
+
       const response = await apiClient.request({
         method: 'PUT',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3961,13 +3717,13 @@ mcpServer.tool(
     try {
       const { employer_id, ...queryParams } = args
       const url = `/employers/${employer_id}/mail_templates`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3984,13 +3740,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/clickme/statistics',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -3998,26 +3753,19 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'get-countries',
-  `Countries`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/areas/countries',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+mcpServer.tool('get-countries', `Countries`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/areas/countries',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
 mcpServer.tool(
   'get-areas',
@@ -4027,13 +3775,12 @@ mcpServer.tool(
   },
   async (args) => {
     try {
-      
       const response = await apiClient.request({
         method: 'GET',
         url: '/areas',
-        params: args
+        params: args,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -4052,13 +3799,13 @@ mcpServer.tool(
     try {
       const { area_id, ...queryParams } = args
       const url = `/areas/${area_id}`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -4066,89 +3813,61 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool(
-  'get-salary-employee-levels',
-  `Competency levels`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/salary_statistics/dictionaries/employee_levels',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
-  }
-)
+mcpServer.tool('get-salary-employee-levels', `Competency levels`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/salary_statistics/dictionaries/employee_levels',
+      params: args,
+    })
 
-mcpServer.tool(
-  'get-salary-salary-areas',
-  `Regions and cities`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/salary_statistics/dictionaries/salary_areas',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
 
-mcpServer.tool(
-  'get-salary-professional-areas',
-  `Professions and specializations`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/salary_statistics/dictionaries/professional_areas',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
-  }
-)
+mcpServer.tool('get-salary-salary-areas', `Regions and cities`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/salary_statistics/dictionaries/salary_areas',
+      params: args,
+    })
 
-mcpServer.tool(
-  'get-salary-industries',
-  `Industries and fields of expertise`,
-  {
-  },
-  async (args) => {
-    try {
-      
-      const response = await apiClient.request({
-        method: 'GET',
-        url: '/salary_statistics/dictionaries/salary_industries',
-        params: args
-      })
-      
-      return handleResult(response.data)
-    } catch (error) {
-      return handleError(error)
-    }
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
   }
-)
+})
+
+mcpServer.tool('get-salary-professional-areas', `Professions and specializations`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/salary_statistics/dictionaries/professional_areas',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
+  }
+})
+
+mcpServer.tool('get-salary-industries', `Industries and fields of expertise`, {}, async (args) => {
+  try {
+    const response = await apiClient.request({
+      method: 'GET',
+      url: '/salary_statistics/dictionaries/salary_industries',
+      params: args,
+    })
+
+    return handleResult(response.data)
+  } catch (error) {
+    return handleError(error)
+  }
+})
 
 mcpServer.tool(
   'get-resume-visibility-employers-list',
@@ -4164,13 +3883,13 @@ mcpServer.tool(
     try {
       const { resume_id, list_type, ...queryParams } = args
       const url = `/resumes/${resume_id}/${list_type}/search`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -4189,13 +3908,13 @@ mcpServer.tool(
     try {
       const { resume_id, list_type, ...queryParams } = args
       const url = `/resumes/${resume_id}/${list_type}`
-      
+
       const response = await apiClient.request({
         method: 'GET',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -4214,13 +3933,13 @@ mcpServer.tool(
     try {
       const { resume_id, list_type, ...requestData } = args
       const url = `/resumes/${resume_id}/${list_type}`
-      
+
       const response = await apiClient.request({
         method: 'POST',
         url: url,
-        data: requestData
+        data: requestData,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -4239,13 +3958,13 @@ mcpServer.tool(
     try {
       const { resume_id, list_type, ...queryParams } = args
       const url = `/resumes/${resume_id}/${list_type}`
-      
+
       const response = await apiClient.request({
         method: 'DELETE',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
@@ -4265,17 +3984,16 @@ mcpServer.tool(
     try {
       const { resume_id, list_type, ...queryParams } = args
       const url = `/resumes/${resume_id}/${list_type}/employer`
-      
+
       const response = await apiClient.request({
         method: 'DELETE',
         url: url,
-        params: queryParams
+        params: queryParams,
       })
-      
+
       return handleResult(response.data)
     } catch (error) {
       return handleError(error)
     }
   }
 )
-

@@ -16,7 +16,7 @@ Thank you for your interest in contributing to the hh! This guide will help you 
 
    ```bash
    git clone https://github.com/sargonpiraev/
-   cd 
+   cd
    ```
 
 2. **Install dependencies**:
@@ -135,4 +135,4 @@ We use semantic-release for automated versioning and publishing:
 
 ## 📄 License
 
-By contributing to hh, you agree that your contributions will be licensed under the MIT License. 
+By contributing to hh, you agree that your contributions will be licensed under the MIT License.
