@@ -1,6 +1,6 @@
-# Contributing to HeadHunter
+# Contributing to hh
 
-Thank you for your interest in contributing to the HeadHunter! This guide will help you get started with development.
+Thank you for your interest in contributing to the hh! This guide will help you get started with development.
 
 ## 🔧 Development Setup
 
@@ -15,8 +15,8 @@ Thank you for your interest in contributing to the HeadHunter! This guide will h
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/sargonpiraev/hh-mcp-server
-   cd hh-mcp-server
+   git clone https://github.com/sargonpiraev/
+   cd 
    ```
 
 2. **Install dependencies**:
@@ -129,10 +129,10 @@ We use semantic-release for automated versioning and publishing:
 
 ## 🆘 Getting Help
 
-- Check existing [issues](https://github.com/sargonpiraev/hh-mcp-server/issues)
+- Check existing [issues](https://github.com/sargonpiraev//issues)
 - Create a new issue if you find a bug
 - Join our [Discord](https://discord.gg/ZsWGxRGj) for community support
 
 ## 📄 License
 
-By contributing to HeadHunter, you agree that your contributions will be licensed under the MIT License.
+By contributing to hh, you agree that your contributions will be licensed under the MIT License. 

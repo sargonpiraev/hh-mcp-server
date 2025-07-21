@@ -10,4 +10,4 @@ const config: Config = {
   coverageReporters: ['clover', 'json', 'lcov', 'text', 'cobertura'],
 }
 
-export default config
+export default config 
