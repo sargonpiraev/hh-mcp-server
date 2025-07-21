@@ -351,7 +351,7 @@ function handleError(error: unknown): CallToolResult {
   logger.error('Error occurred:', JSON.stringify(error))
 
   if (axios.isAxiosError(error)) {
-    const message = error.response?.data?.description || error.message
+    const message = error.response?.data?.message || error.message
     return {
       isError: true,
       content: [{ type: 'text', text: `API Error: ${message}` }],
@@ -364,7 +364,7 @@ function handleError(error: unknown): CallToolResult {
   } as CallToolResult
 }
 
-mcpServer.tool('post-resume-phone-confirm', `Verify phone with a code`, {}, async (args) => {
+mcpServer.tool('confirm-phone-in-resume', `Verify phone with a code`, {}, async (args) => {
   try {
     const response = await apiClient.post('/resume_phone_confirm', args)
     return handleResult(response.data)
@@ -374,7 +374,7 @@ mcpServer.tool('post-resume-phone-confirm', `Verify phone with a code`, {}, asyn
 })
 
 mcpServer.tool(
-  'get-employers-managers-settings',
+  'get-manager-settings',
   `Manager preferences`,
   {
     employer_id: z.string(),
@@ -396,7 +396,7 @@ mcpServer.tool(
 )
 
 mcpServer.tool(
-  'get-employers-managers-limits-resume',
+  'get-employer-manager-limits',
   `Daily limit of resume views for current manager`,
   {
     employer_id: z.string(),
@@ -418,7 +418,7 @@ mcpServer.tool(
 )
 
 mcpServer.tool(
-  'get-employers-addresses',
+  'get-employer-addresses',
   `Directory of employer&#x27;s addresses`,
   {
     employer_id: z.string(),
@@ -444,7 +444,7 @@ mcpServer.tool(
 )
 
 mcpServer.tool(
-  'get-employers-managers',
+  'get-employer-managers',
   `Directory of employer&#x27;s managers`,
   {
     employer_id: z.string(),
@@ -468,7 +468,7 @@ mcpServer.tool(
 )
 
 mcpServer.tool(
-  'post-employers-managers',
+  'add-employer-manager',
   `Adding a manager`,
   {
     employer_id: z.string(),
@@ -487,7 +487,7 @@ mcpServer.tool(
 )
 
 mcpServer.tool(
-  'get-employers-manager-types',
+  'get-employer-manager-types',
   `Directory of manager types and privileges`,
   {
     employer_id: z.string(),
@@ -507,7 +507,7 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool('get-manager-accounts-mine', `Manager&#x27;s work accounts`, {}, async (args) => {
+mcpServer.tool('get-manager-accounts', `Manager&#x27;s work accounts`, {}, async (args) => {
   try {
     const response = await apiClient.get('/manager_accounts/mine', {
       params: args,
@@ -519,7 +519,7 @@ mcpServer.tool('get-manager-accounts-mine', `Manager&#x27;s work accounts`, {}, 
 })
 
 mcpServer.tool(
-  'get-resume-should-send-sms',
+  'get-applicant-phone-info',
   `Get information about the applicant&#x27;s phone number`,
   {
     phone: z.string(),
@@ -537,7 +537,7 @@ mcpServer.tool(
 )
 
 mcpServer.tool(
-  'get-employers-addresses',
+  'get-address',
   `Get address by ID`,
   {
     employer_id: z.string(),
