@@ -15,7 +15,7 @@ declare module 'express-serve-static-core' {
 
 const envSchema = baseEnvSchema.extend({
   PORT: z.string().optional().default('3000'),
-  HOST: z.string().optional().default('127.0.0.1'),
+  HOST: z.string().optional().default('localhost'),
   HH_CLIENT_ID: z.string(),
   HH_CLIENT_SECRET: z.string(),
   HH_USER_AGENT: z.string(),
@@ -60,19 +60,20 @@ app.get('/.well-known/oauth-protected-resource', (req, res) => {
 
 // OAuth 2.0 Authorization Server Metadata endpoint - HeadHunter doesn't provide this, so we create it
 app.get('/.well-known/oauth-authorization-server', (req, res) => {
+  const baseUrl = `http://${env.HOST}:${env.PORT}`
+
   res.json({
-    issuer: 'https://api.hh.ru',
-    authorization_endpoint: 'https://hh.ru/oauth/authorize',
-    token_endpoint: 'https://api.hh.ru/token',
-    registration_endpoint: `${req.protocol}://${req.get('host')}/oauth/register`,
-    jwks_uri: `${req.protocol}://${req.get('host')}/.well-known/jwks.json`,
+    issuer: baseUrl, // This MCP server IS the authorization server now
+    authorization_endpoint: `${baseUrl}/oauth/authorize`, // Our facade endpoint
+    token_endpoint: `${baseUrl}/oauth/token`, // Our facade endpoint
+    registration_endpoint: `${baseUrl}/oauth/register`,
+    jwks_uri: `${baseUrl}/.well-known/jwks.json`,
     response_types_supported: ['code'],
     grant_types_supported: ['authorization_code', 'refresh_token'],
     token_endpoint_auth_methods_supported: ['client_secret_post', 'client_secret_basic'],
     code_challenge_methods_supported: ['S256'],
     scopes_supported: [],
-    // Note: This endpoint simulates DCR for Inspector compatibility
-    // Real HeadHunter OAuth happens via pre-registered clients at dev.hh.ru
+    // This is now a real OAuth Authorization Server, not just metadata
   })
 })
 
@@ -122,17 +123,17 @@ app.post('/oauth/register', (req, res) => {
     // This simulates DCR but actually uses static credentials
     const client_id = env.HH_CLIENT_ID
 
-    logger.log(`DCR simulation: Returning HeadHunter client credentials for "${client_name}"`)
+    logger.log(`DCR facade: Accepting any redirect_uri for "${client_name}"`)
 
-    // Return successful registration response with HeadHunter client_id
+    // Return successful registration response - now we accept ANY redirect_uri
     res.json({
       client_id,
       client_name,
       grant_types,
       response_types,
-      redirect_uris, // Use the redirect_uris from the request
+      redirect_uris, // Accept client's redirect_uris as-is (facade supports any URI)
       scope,
-      token_endpoint_auth_method: 'client_secret_basic', // HeadHunter uses client_secret
+      token_endpoint_auth_method: 'client_secret_basic',
       client_id_issued_at: Math.floor(Date.now() / 1000),
     })
   } catch (error) {
@@ -153,15 +154,168 @@ app.get('/.well-known/oauth-client-config', (req, res) => {
     })
   }
 
+  const baseUrl = `http://${env.HOST}:${env.PORT}`
+
   res.json({
     client_id: env.HH_CLIENT_ID,
-    authorization_endpoint: 'https://hh.ru/oauth/authorize',
-    token_endpoint: 'https://api.hh.ru/token',
+    authorization_endpoint: `${baseUrl}/oauth/authorize`, // Our facade endpoint
+    token_endpoint: `${baseUrl}/oauth/token`, // Our facade endpoint
     scope: '', // OAuth server doesn't use explicit scopes
     response_type: 'code',
     redirect_uri: env.HH_REDIRECT_URI || 'http://localhost:6274/oauth/callback/debug', // Configurable redirect URI
     code_challenge_method: 'S256', // PKCE for security
   })
+})
+
+// Facade OAuth Authorization endpoint - accepts any redirect_uri and delegates to HeadHunter
+app.get('/oauth/authorize', (req, res) => {
+  const { client_id, redirect_uri, state, code_challenge, code_challenge_method = 'S256' } = req.query
+
+  // Validate required parameters
+  if (!client_id || !redirect_uri) {
+    return res.status(400).json({
+      error: 'invalid_request',
+      error_description: 'client_id and redirect_uri are required',
+    })
+  }
+
+  // Store original request parameters for later use in callback
+  const stateKey = `auth_${crypto.randomUUID()}`
+  sessions.set(stateKey, {
+    originalRedirectUri: redirect_uri as string,
+    originalState: state as string,
+    clientId: client_id as string,
+    codeChallenge: code_challenge as string,
+    codeChallengeMethod: code_challenge_method as string,
+    createdAt: new Date(),
+  })
+
+  // Construct HeadHunter authorization URL with our callback
+  const hhAuthUrl = new URL('https://hh.ru/oauth/authorize')
+  hhAuthUrl.searchParams.set('client_id', env.HH_CLIENT_ID || '')
+  hhAuthUrl.searchParams.set('response_type', 'code')
+  hhAuthUrl.searchParams.set(
+    'redirect_uri',
+    env.HH_REDIRECT_URI || `http://${env.HOST}:${env.PORT}/oauth/callback/debug`
+  )
+  hhAuthUrl.searchParams.set('state', stateKey) // Use our state key
+
+  logger.log(`Facade authorize: Redirecting to HeadHunter with state=${stateKey}`)
+
+  // Redirect user to HeadHunter authorization
+  res.redirect(hhAuthUrl.toString())
+})
+
+// Facade OAuth Token endpoint - exchanges authorization code for access token
+app.post('/oauth/token', express.urlencoded({ extended: true }), async (req, res) => {
+  const { grant_type, client_id, code, redirect_uri, code_verifier } = req.body
+
+  // Validate required parameters
+  if (grant_type !== 'authorization_code' || !client_id || !code || !redirect_uri) {
+    return res.status(400).json({
+      error: 'invalid_request',
+      error_description: 'Invalid token request parameters',
+    })
+  }
+
+  try {
+    // Use the configured redirect_uri instead of the client's redirect_uri
+    const configuredRedirectUri = env.HH_REDIRECT_URI || `http://${env.HOST}:${env.PORT}/oauth/callback/debug`
+
+    // Prepare token request for HeadHunter
+    const tokenParams = new URLSearchParams({
+      grant_type: 'authorization_code',
+      client_id: env.HH_CLIENT_ID || '',
+      client_secret: env.HH_CLIENT_SECRET || '',
+      code: code,
+      redirect_uri: configuredRedirectUri, // Use our configured redirect_uri, not client's
+    })
+
+    // Add PKCE code_verifier if provided by client
+    if (code_verifier) {
+      tokenParams.set('code_verifier', code_verifier)
+    }
+
+    logger.log(`Facade token: Exchanging code with HeadHunter, redirect_uri=${configuredRedirectUri}`)
+
+    // Exchange code with HeadHunter token endpoint
+    const tokenResponse = await fetch('https://api.hh.ru/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'MCP-Facade-Server/1.0',
+      },
+      body: tokenParams,
+    })
+
+    if (!tokenResponse.ok) {
+      const errorText = await tokenResponse.text()
+      logger.error(`HeadHunter token exchange failed: ${tokenResponse.status} ${errorText}`)
+      return res.status(400).json({
+        error: 'invalid_grant',
+        error_description: 'Authorization code is invalid or expired',
+      })
+    }
+
+    const tokenData = (await tokenResponse.json()) as Record<string, unknown>
+
+    logger.log(`Facade token: Successfully exchanged code for HeadHunter access token`)
+
+    // Return the token response from HeadHunter (with our issuer)
+    res.json({
+      ...tokenData,
+      issuer: `http://${env.HOST}:${env.PORT}`, // Override issuer to point to our facade
+    })
+  } catch (error) {
+    logger.error('Token exchange error:', error instanceof Error ? error.message : String(error))
+    res.status(500).json({
+      error: 'server_error',
+      error_description: 'Internal server error during token exchange',
+    })
+  }
+})
+
+// Enhanced proxy callback endpoint for facade authorization flow
+app.get('/oauth/callback/debug', (req, res) => {
+  const { code, state, error, error_description } = req.query
+
+  if (error) {
+    logger.error(`HeadHunter authorization error: ${error} - ${error_description}`)
+    return res.status(400).json({
+      error: error as string,
+      error_description: error_description as string,
+    })
+  }
+
+  if (!code || !state) {
+    return res.status(400).json({
+      error: 'invalid_request',
+      error_description: 'Missing authorization code or state parameter',
+    })
+  }
+
+  // Retrieve stored authorization request
+  const authSession = sessions.get(state as string)
+  if (!authSession) {
+    logger.error(`No session found for state: ${state}`)
+    return res.status(400).json({
+      error: 'invalid_state',
+      error_description: 'Invalid or expired authorization request',
+    })
+  }
+
+  // Clean up session
+  sessions.delete(state as string)
+
+  // Redirect back to original client with authorization code
+  const callbackUrl = new URL(authSession.originalRedirectUri as string)
+  callbackUrl.searchParams.set('code', code as string)
+  if (authSession.originalState) {
+    callbackUrl.searchParams.set('state', authSession.originalState as string)
+  }
+
+  logger.log(`Facade callback: Redirecting to original client: ${callbackUrl.toString()}`)
+  res.redirect(callbackUrl.toString())
 })
 
 // Session management middleware
