@@ -30,7 +30,7 @@ export const mcpServer = new McpServer(
 export const env = envSchema.parse(process.env)
 
 export const apiClient: AxiosInstance = axios.create({
-  baseURL: '',
+  baseURL: 'https://api.hh.ru',
   headers: {
     Accept: 'application/json',
   },
