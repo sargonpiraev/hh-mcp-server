@@ -5,6 +5,8 @@ import cors from 'cors'
 import crypto from 'crypto'
 import { z } from 'zod'
 import { mcpServer, envSchema as baseEnvSchema } from './server.js'
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
+import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js'
 
 // Extend Express Request type to include user info
 declare module 'express-serve-static-core' {
@@ -26,9 +28,15 @@ const env = envSchema.parse(process.env)
 
 const app = express()
 const sessions = new Map<string, Record<string, unknown>>()
+const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {}
 
-// Enable CORS for all routes
-app.use(cors())
+// Enable CORS for all routes and expose MCP session header
+app.use(
+  cors({
+    origin: '*', // Allow all origins
+    exposedHeaders: ['Mcp-Session-Id'],
+  })
+)
 
 app.use(express.json({ limit: '10mb' }))
 
@@ -395,24 +403,66 @@ async function requireAuth(req: express.Request, res: express.Response, next: ex
 // MCP endpoint - POST for JSON-RPC requests
 app.post('/mcp', requireAuth, async (req, res) => {
   try {
-    const sessionId = getOrCreateSession(req)
-    res.set('Mcp-Session-Id', sessionId)
-    res.set('Content-Type', 'application/json')
+    const sessionId = req.get('Mcp-Session-Id')
+    logger.log(sessionId ? `MCP request for session: ${sessionId}` : 'New MCP request')
 
-    // Handle JSON-RPC request through MCP server
-    const result = await mcpServer.server.request(req.body, z.any())
-    res.json(result)
+    let transport: StreamableHTTPServerTransport
+
+    if (sessionId && transports[sessionId]) {
+      // Reuse existing transport
+      transport = transports[sessionId]
+    } else if (!sessionId && isInitializeRequest(req.body)) {
+      // New initialization request
+      transport = new StreamableHTTPServerTransport({
+        sessionIdGenerator: () => crypto.randomUUID(),
+        enableJsonResponse: true, // Enable JSON response mode for simplicity
+        onsessioninitialized: (sessionId) => {
+          logger.log(`Session initialized with ID: ${sessionId}`)
+          transports[sessionId] = transport
+        },
+      })
+
+      // Set up cleanup on close
+      transport.onclose = () => {
+        const sid = transport.sessionId
+        if (sid && transports[sid]) {
+          logger.log(`Transport closed for session ${sid}`)
+          delete transports[sid]
+        }
+      }
+
+      // Connect transport to MCP server BEFORE handling request
+      await mcpServer.connect(transport)
+      await transport.handleRequest(req, res, req.body)
+      return // Already handled
+    } else {
+      // Invalid request - no session ID or not initialization request
+      res.status(400).json({
+        jsonrpc: '2.0',
+        error: {
+          code: -32000,
+          message: 'Bad Request: No valid session ID provided',
+        },
+        id: null,
+      })
+      return
+    }
+
+    // Handle the request with existing transport
+    await transport.handleRequest(req, res, req.body)
   } catch (error) {
-    console.error('MCP request error:', error)
-    res.status(500).json({
-      jsonrpc: '2.0',
-      error: {
-        code: -32603,
-        message: 'Internal error',
-        data: error instanceof Error ? error.message : String(error),
-      },
-      id: req.body?.id || null,
-    })
+    logger.error('MCP request error:', error instanceof Error ? error.message : String(error))
+    if (!res.headersSent) {
+      res.status(500).json({
+        jsonrpc: '2.0',
+        error: {
+          code: -32603,
+          message: 'Internal error',
+          data: error instanceof Error ? error.message : String(error),
+        },
+        id: req.body?.id || null,
+      })
+    }
   }
 })
 
@@ -494,13 +544,45 @@ async function main() {
 }
 
 // Graceful shutdown
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   logger.log('Shutting down MCP Server...')
+
+  // Close all active transports
+  for (const sessionId in transports) {
+    try {
+      logger.log(`Closing transport for session ${sessionId}`)
+      await transports[sessionId].close()
+      delete transports[sessionId]
+    } catch (error) {
+      logger.error(
+        `Error closing transport for session ${sessionId}:`,
+        error instanceof Error ? error.message : String(error)
+      )
+    }
+  }
+
+  logger.log('Server shutdown complete')
   process.exit(0)
 })
 
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   logger.log('Shutting down MCP Server...')
+
+  // Close all active transports
+  for (const sessionId in transports) {
+    try {
+      logger.log(`Closing transport for session ${sessionId}`)
+      await transports[sessionId].close()
+      delete transports[sessionId]
+    } catch (error) {
+      logger.error(
+        `Error closing transport for session ${sessionId}:`,
+        error instanceof Error ? error.message : String(error)
+      )
+    }
+  }
+
+  logger.log('Server shutdown complete')
   process.exit(0)
 })
 
