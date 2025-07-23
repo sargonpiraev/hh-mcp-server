@@ -326,27 +326,6 @@ app.get('/oauth/callback/debug', (req, res) => {
   res.redirect(callbackUrl.toString())
 })
 
-// Session management middleware
-function getOrCreateSession(req: express.Request): string {
-  let sessionId = req.get('Mcp-Session-Id')
-
-  if (!sessionId || !sessions.has(sessionId)) {
-    sessionId = crypto.randomUUID()
-    sessions.set(sessionId, {
-      id: sessionId,
-      createdAt: new Date(),
-      lastAccessAt: new Date(),
-    })
-  } else {
-    const session = sessions.get(sessionId)
-    if (session) {
-      session.lastAccessAt = new Date()
-    }
-  }
-
-  return sessionId
-}
-
 // Authorization middleware
 async function requireAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
   const authHeader = req.get('Authorization')
@@ -466,64 +445,12 @@ app.post('/mcp', requireAuth, async (req, res) => {
   }
 })
 
-// MCP endpoint - GET for SSE streams
-app.get('/mcp', requireAuth, (req, res) => {
-  const sessionId = getOrCreateSession(req)
-
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    Connection: 'keep-alive',
-    'Access-Control-Allow-Origin': req.get('Origin') || '*',
-    'Access-Control-Allow-Headers': 'Authorization, Mcp-Session-Id',
-    'Mcp-Session-Id': sessionId,
-  })
-
-  // Send initial connection event
-  res.write(`id: ${Date.now()}\n`)
-  res.write(`event: connected\n`)
-  res.write(`data: {"sessionId": "${sessionId}"}\n\n`)
-
-  // Handle client disconnect
-  req.on('close', () => {
-    res.end()
-  })
-
-  // Keep connection alive
-  const keepAlive = setInterval(() => {
-    res.write(`id: ${Date.now()}\n`)
-    res.write(`event: heartbeat\n`)
-    res.write(`data: {"timestamp": "${new Date().toISOString()}"}\n\n`)
-  }, 30000)
-
-  req.on('close', () => {
-    clearInterval(keepAlive)
-  })
-})
-
-// Session termination endpoint
-app.delete('/mcp', requireAuth, (req, res) => {
-  const sessionId = req.get('Mcp-Session-Id')
-
-  if (sessionId && sessions.has(sessionId)) {
-    sessions.delete(sessionId)
-    res.json({ message: 'Session terminated' })
-  } else {
-    res.status(404).json({ error: 'Session not found' })
-  }
-})
-
-// OAuth endpoints are handled by the authorization server directly:
-// - Authorization: https://api.hh.ru/oauth/authorize (adjusted for auth domain)
-// - Token: https://api.hh.ru/token
-// - Inspector will communicate with the authorization server directly for OAuth flow
-
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    version: '',
+    version: '1.0.0',
   })
 })
 
