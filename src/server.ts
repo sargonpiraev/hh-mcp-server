@@ -81,11 +81,11 @@ function handleError(error: unknown): CallToolResult {
 // Register tools
 mcpServer.tool('confirm-phone-in-resume', `Verify phone with a code`, {}, async (args, extra) => {
   try {
-    const requestData = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...requestData }
+    const mappedParams: any = (args as any).requestData || { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -113,12 +113,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, managerId, ...queryParams } = args
+      const { employerId, managerId, ...otherParams } = args
       const url = `/employers/${employerId}/managers/${managerId}/settings`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -155,12 +155,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, managerId, ...queryParams } = args
+      const { employerId, managerId, ...otherParams } = args
       const url = `/employers/${employerId}/managers/${managerId}/limits/resume`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -201,12 +201,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, ...queryParams } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/${employerId}/addresses`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -257,12 +257,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, ...queryParams } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/${employerId}/managers`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -299,15 +299,16 @@ mcpServer.tool(
   `Adding a manager`,
   {
     employerId: z.string(),
+    requestData: z.record(z.any()).optional(),
   },
   async (args, extra) => {
     try {
-      const { employerId, ...requestData } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/${employerId}/managers`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -339,12 +340,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, ...queryParams } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/${employerId}/manager_types`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -370,11 +371,11 @@ mcpServer.tool(
 
 mcpServer.tool('get-manager-accounts', `Manager&#x27;s work accounts`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -401,11 +402,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -435,12 +436,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, addressId, ...queryParams } = args
+      const { employerId, addressId, ...otherParams } = args
       const url = `/employers/${employerId}/addresses/${addressId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -478,15 +479,16 @@ mcpServer.tool(
   {
     employerId: z.string(),
     managerId: z.string(),
+    requestData: z.record(z.any()).optional(),
   },
   async (args, extra) => {
     try {
-      const { employerId, managerId, ...requestData } = args
+      const { employerId, managerId, ...otherParams } = args
       const url = `/employers/${employerId}/managers/${managerId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -523,12 +525,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, managerId, ...queryParams } = args
+      const { employerId, managerId, ...otherParams } = args
       const url = `/employers/${employerId}/managers/${managerId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -566,12 +568,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, managerId, ...queryParams } = args
+      const { employerId, managerId, ...otherParams } = args
       const url = `/employers/${employerId}/managers/${managerId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -609,11 +611,11 @@ mcpServer.tool(
   {},
   async (args, extra) => {
     try {
-      const requestData = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -635,11 +637,11 @@ mcpServer.tool(
 
 mcpServer.tool('authorize', `Getting an access-token`, {}, async (args, extra) => {
   try {
-    const requestData = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...requestData }
+    const mappedParams: any = (args as any).requestData || { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -660,11 +662,11 @@ mcpServer.tool('authorize', `Getting an access-token`, {}, async (args, extra) =
 
 mcpServer.tool('invalidate-token', `Access token invalidation`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -685,11 +687,11 @@ mcpServer.tool('invalidate-token', `Access token invalidation`, {}, async (args,
 
 mcpServer.tool('get-current-user-info', `Info on current authorized user`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -710,11 +712,11 @@ mcpServer.tool('get-current-user-info', `Info on current authorized user`, {}, a
 
 mcpServer.tool('edit-current-user-info', `Editing information on the authorized user`, {}, async (args, extra) => {
   try {
-    const requestData = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...requestData }
+    const mappedParams: any = (args as any).requestData || { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -735,11 +737,11 @@ mcpServer.tool('edit-current-user-info', `Editing information on the authorized 
 
 mcpServer.tool('get-locales-for-resume', `The list of available resume locales`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -760,11 +762,11 @@ mcpServer.tool('get-locales-for-resume', `The list of available resume locales`,
 
 mcpServer.tool('get-locales', `The list of available locales`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -791,11 +793,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -823,11 +825,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -856,11 +858,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('areaId' in mappedParams) {
         mappedParams['area_id'] = mappedParams['areaId']
         delete mappedParams['areaId']
@@ -892,11 +894,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -924,11 +926,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -956,11 +958,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -988,11 +990,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -1022,11 +1024,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('areaId' in mappedParams) {
         mappedParams['area_id'] = mappedParams['areaId']
         delete mappedParams['areaId']
@@ -1062,11 +1064,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -1094,11 +1096,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -1126,11 +1128,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -1158,12 +1160,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { resumeId, ...queryParams } = args
+      const { resumeId, ...otherParams } = args
       const url = `/resume_profile/${resumeId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']
@@ -1192,15 +1194,16 @@ mcpServer.tool(
   `Обновление резюме-профиля соискателя`,
   {
     resumeId: z.string(),
+    requestData: z.record(z.any()).optional(),
   },
   async (args, extra) => {
     try {
-      const { resumeId, ...requestData } = args
+      const { resumeId, ...otherParams } = args
       const url = `/resume_profile/${resumeId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']
@@ -1224,38 +1227,45 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool('create-resume-profile', `Создание резюме-профиля соискателя`, {}, async (args, extra) => {
-  try {
-    const requestData = args
+mcpServer.tool(
+  'create-resume-profile',
+  `Создание резюме-профиля соискателя`,
+  {
+    requestData: z.record(z.any()).optional(),
+  },
+  async (args, extra) => {
+    try {
+      const otherParams = args
 
-    // Map camelCase to original parameter names for API request
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...requestData }
+      // Map camelCase to original parameter names for API request
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
 
-    // Extract authorization token from HTTP request headers
-    const authorization = extra?.requestInfo?.headers?.authorization as string
-    const bearer = authorization?.replace('Bearer ', '')
+      // Extract authorization token from HTTP request headers
+      const authorization = extra?.requestInfo?.headers?.authorization as string
+      const bearer = authorization?.replace('Bearer ', '')
 
-    const response = await apiClient.request({
-      headers: bearer ? { Authorization: `Bearer ${bearer}` } : undefined,
-      method: 'POST',
-      url: '/resume_profile',
-      data: mappedParams,
-    })
+      const response = await apiClient.request({
+        headers: bearer ? { Authorization: `Bearer ${bearer}` } : undefined,
+        method: 'POST',
+        url: '/resume_profile',
+        data: mappedParams,
+      })
 
-    return handleResult(response.data)
-  } catch (error) {
-    return handleError(error)
+      return handleResult(response.data)
+    } catch (error) {
+      return handleError(error)
+    }
   }
-})
+)
 
 mcpServer.tool('get-resume-profile-dictionaries', `Получение cловарей резюме-профиля`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -1282,12 +1292,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, ...queryParams } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/${employerId}/services/payable_api_actions/active`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -1320,12 +1330,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, managerId, ...queryParams } = args
+      const { employerId, managerId, ...otherParams } = args
       const url = `/employers/${employerId}/managers/${managerId}/method_access`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -1362,11 +1372,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('perPage' in mappedParams) {
         mappedParams['per_page'] = mappedParams['perPage']
         delete mappedParams['perPage']
@@ -1430,11 +1440,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const requestData = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('perPage' in mappedParams) {
         mappedParams['per_page'] = mappedParams['perPage']
         delete mappedParams['perPage']
@@ -1536,12 +1546,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { vacancyId, ...queryParams } = args
+      const { vacancyId, ...otherParams } = args
       const url = `/vacancies/${vacancyId}/visitors`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('vacancyId' in mappedParams) {
         mappedParams['vacancy_id'] = mappedParams['vacancyId']
         delete mappedParams['vacancyId']
@@ -1577,12 +1587,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { vacancyId, ...queryParams } = args
+      const { vacancyId, ...otherParams } = args
       const url = `/vacancies/${vacancyId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('vacancyId' in mappedParams) {
         mappedParams['vacancy_id'] = mappedParams['vacancyId']
         delete mappedParams['vacancyId']
@@ -1613,15 +1623,16 @@ mcpServer.tool(
     vacancyId: z.string(),
     ignoreDuplicates: z.string().optional(),
     ignoreReplacementWarning: z.string().optional(),
+    requestData: z.record(z.any()).optional(),
   },
   async (args, extra) => {
     try {
-      const { vacancyId, ...requestData } = args
+      const { vacancyId, ...otherParams } = args
       const url = `/vacancies/${vacancyId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('vacancyId' in mappedParams) {
         mappedParams['vacancy_id'] = mappedParams['vacancyId']
         delete mappedParams['vacancyId']
@@ -1655,11 +1666,11 @@ mcpServer.tool(
 
 mcpServer.tool('get-blacklisted-vacancies', `List of hidden vacancies`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -1683,14 +1694,15 @@ mcpServer.tool(
   `Publishing job vacancies`,
   {
     ignoreDuplicates: z.string().optional(),
+    requestData: z.record(z.any()).optional(),
   },
   async (args, extra) => {
     try {
-      const requestData = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('ignoreDuplicates' in mappedParams) {
         mappedParams['ignore_duplicates'] = mappedParams['ignoreDuplicates']
         delete mappedParams['ignoreDuplicates']
@@ -1760,11 +1772,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('perPage' in mappedParams) {
         mappedParams['per_page'] = mappedParams['perPage']
         delete mappedParams['perPage']
@@ -1921,12 +1933,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { vacancyId, ...queryParams } = args
+      const { vacancyId, ...otherParams } = args
       const url = `/vacancies/${vacancyId}/related_vacancies`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('vacancyId' in mappedParams) {
         mappedParams['vacancy_id'] = mappedParams['vacancyId']
         delete mappedParams['vacancyId']
@@ -2034,12 +2046,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { id, ...queryParams } = args
+      const { id, ...otherParams } = args
       const url = `/saved_searches/vacancies/${id}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -2069,12 +2081,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { id, ...requestData } = args
+      const { id, ...otherParams } = args
       const url = `/saved_searches/vacancies/${id}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -2102,12 +2114,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { id, ...queryParams } = args
+      const { id, ...otherParams } = args
       const url = `/saved_searches/vacancies/${id}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -2168,12 +2180,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { vacancyId, ...queryParams } = args
+      const { vacancyId, ...otherParams } = args
       const url = `/vacancies/${vacancyId}/similar_vacancies`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('vacancyId' in mappedParams) {
         mappedParams['vacancy_id'] = mappedParams['vacancyId']
         delete mappedParams['vacancyId']
@@ -2281,12 +2293,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { vacancyId, ...queryParams } = args
+      const { vacancyId, ...otherParams } = args
       const url = `/vacancies/${vacancyId}/upgrades`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('vacancyId' in mappedParams) {
         mappedParams['vacancy_id'] = mappedParams['vacancyId']
         delete mappedParams['vacancyId']
@@ -2351,12 +2363,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { resumeId, ...queryParams } = args
+      const { resumeId, ...otherParams } = args
       const url = `/resumes/${resumeId}/similar_vacancies`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']
@@ -2465,11 +2477,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('perPage' in mappedParams) {
         mappedParams['per_page'] = mappedParams['perPage']
         delete mappedParams['perPage']
@@ -2501,12 +2513,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { vacancyId, ...requestData } = args
+      const { vacancyId, ...otherParams } = args
       const url = `/vacancies/blacklisted/${vacancyId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('vacancyId' in mappedParams) {
         mappedParams['vacancy_id'] = mappedParams['vacancyId']
         delete mappedParams['vacancyId']
@@ -2538,12 +2550,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { vacancyId, ...queryParams } = args
+      const { vacancyId, ...otherParams } = args
       const url = `/vacancies/blacklisted/${vacancyId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('vacancyId' in mappedParams) {
         mappedParams['vacancy_id'] = mappedParams['vacancyId']
         delete mappedParams['vacancyId']
@@ -2582,12 +2594,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, ...queryParams } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/${employerId}/vacancies/active`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -2639,12 +2651,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, ...queryParams } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/${employerId}/vacancies/hidden`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -2689,12 +2701,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, vacancyId, ...requestData } = args
+      const { employerId, vacancyId, ...otherParams } = args
       const url = `/employers/${employerId}/vacancies/hidden/${vacancyId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -2731,12 +2743,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, vacancyId, ...queryParams } = args
+      const { employerId, vacancyId, ...otherParams } = args
       const url = `/employers/${employerId}/vacancies/hidden/${vacancyId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -2770,11 +2782,11 @@ mcpServer.tool(
   {},
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -2802,12 +2814,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { vacancyId, ...queryParams } = args
+      const { vacancyId, ...otherParams } = args
       const url = `/vacancies/${vacancyId}/prolongate`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('vacancyId' in mappedParams) {
         mappedParams['vacancy_id'] = mappedParams['vacancyId']
         delete mappedParams['vacancyId']
@@ -2839,12 +2851,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { vacancyId, ...requestData } = args
+      const { vacancyId, ...otherParams } = args
       const url = `/vacancies/${vacancyId}/prolongate`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('vacancyId' in mappedParams) {
         mappedParams['vacancy_id'] = mappedParams['vacancyId']
         delete mappedParams['vacancyId']
@@ -2877,12 +2889,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, vacancyId, ...requestData } = args
+      const { employerId, vacancyId, ...otherParams } = args
       const url = `/employers/${employerId}/vacancies/archived/${vacancyId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -2918,12 +2930,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { id, ...queryParams } = args
+      const { id, ...otherParams } = args
       const url = `/vacancies/${id}/preferred_negotiations_order`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -2951,12 +2963,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { id, ...requestData } = args
+      const { id, ...otherParams } = args
       const url = `/vacancies/${id}/preferred_negotiations_order`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -2984,12 +2996,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { vacancyId, ...requestData } = args
+      const { vacancyId, ...otherParams } = args
       const url = `/vacancies/favorited/${vacancyId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('vacancyId' in mappedParams) {
         mappedParams['vacancy_id'] = mappedParams['vacancyId']
         delete mappedParams['vacancyId']
@@ -3021,12 +3033,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { vacancyId, ...queryParams } = args
+      const { vacancyId, ...otherParams } = args
       const url = `/vacancies/favorited/${vacancyId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('vacancyId' in mappedParams) {
         mappedParams['vacancy_id'] = mappedParams['vacancyId']
         delete mappedParams['vacancyId']
@@ -3059,12 +3071,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, managerId, ...queryParams } = args
+      const { employerId, managerId, ...otherParams } = args
       const url = `/employers/${employerId}/managers/${managerId}/vacancies/available_types`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -3100,12 +3112,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { vacancyId, ...queryParams } = args
+      const { vacancyId, ...otherParams } = args
       const url = `/vacancies/${vacancyId}/stats`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('vacancyId' in mappedParams) {
         mappedParams['vacancy_id'] = mappedParams['vacancyId']
         delete mappedParams['vacancyId']
@@ -3141,12 +3153,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, ...queryParams } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/${employerId}/vacancies/archived`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -3184,11 +3196,11 @@ mcpServer.tool(
 
 mcpServer.tool('get-artifacts-portfolio-conditions', `Conditions for uploading portfolio`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -3215,12 +3227,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { id, ...requestData } = args
+      const { id, ...otherParams } = args
       const url = `/artifacts/${id}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -3248,12 +3260,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { id, ...queryParams } = args
+      const { id, ...otherParams } = args
       const url = `/artifacts/${id}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -3275,11 +3287,11 @@ mcpServer.tool(
 
 mcpServer.tool('load-artifact', `Uploading an artifact`, {}, async (args, extra) => {
   try {
-    const requestData = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...requestData }
+    const mappedParams: any = (args as any).requestData || { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -3300,11 +3312,11 @@ mcpServer.tool('load-artifact', `Uploading an artifact`, {}, async (args, extra)
 
 mcpServer.tool('get-artifacts-portfolio', `Getting portfolios`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -3325,11 +3337,11 @@ mcpServer.tool('get-artifacts-portfolio', `Getting portfolios`, {}, async (args,
 
 mcpServer.tool('get-artifact-photos-conditions', `Conditions for uploading photos`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -3350,11 +3362,11 @@ mcpServer.tool('get-artifact-photos-conditions', `Conditions for uploading photo
 
 mcpServer.tool('get-artifact-photos', `Getting photos`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -3375,11 +3387,11 @@ mcpServer.tool('get-artifact-photos', `Getting photos`, {}, async (args, extra) 
 
 mcpServer.tool('get-dictionaries', `Directories of fields`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -3400,11 +3412,11 @@ mcpServer.tool('get-dictionaries', `Directories of fields`, {}, async (args, ext
 
 mcpServer.tool('get-languages', `The list of all languages`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -3431,11 +3443,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -3463,11 +3475,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -3489,11 +3501,11 @@ mcpServer.tool(
 
 mcpServer.tool('get-professional-roles-dictionary', `Professional role directory`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -3520,12 +3532,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { id, ...queryParams } = args
+      const { id, ...otherParams } = args
       const url = `/educational_institutions/${id}/faculties`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -3547,11 +3559,11 @@ mcpServer.tool(
 
 mcpServer.tool('get-industries', `Industries`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -3579,12 +3591,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { collectionName, nid, ...requestData } = args
+      const { collectionName, nid, ...otherParams } = args
       const url = `/negotiations/${collectionName}/${nid}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('collectionName' in mappedParams) {
         mappedParams['collection_name'] = mappedParams['collectionName']
         delete mappedParams['collectionName']
@@ -3610,11 +3622,11 @@ mcpServer.tool(
 
 mcpServer.tool('apply-to-vacancy', `Apply for a vacancy`, {}, async (args, extra) => {
   try {
-    const requestData = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...requestData }
+    const mappedParams: any = (args as any).requestData || { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -3649,11 +3661,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('perPage' in mappedParams) {
         mappedParams['per_page'] = mappedParams['perPage']
         delete mappedParams['perPage']
@@ -3706,12 +3718,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, managerId, ...queryParams } = args
+      const { employerId, managerId, ...otherParams } = args
       const url = `/employers/${employerId}/managers/${managerId}/negotiations_statistics`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -3753,11 +3765,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('perPage' in mappedParams) {
         mappedParams['per_page'] = mappedParams['perPage']
         delete mappedParams['perPage']
@@ -3808,12 +3820,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { template, ...queryParams } = args
+      const { template, ...otherParams } = args
       const url = `/message_templates/${template}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('topicId' in mappedParams) {
         mappedParams['topic_id'] = mappedParams['topicId']
         delete mappedParams['topicId']
@@ -3875,11 +3887,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('vacancyId' in mappedParams) {
         mappedParams['vacancy_id'] = mappedParams['vacancyId']
         delete mappedParams['vacancyId']
@@ -3961,11 +3973,11 @@ mcpServer.tool(
 
 mcpServer.tool('invite-applicant-to-vacancy', `Invite applicant for a vacancy`, {}, async (args, extra) => {
   try {
-    const requestData = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...requestData }
+    const mappedParams: any = (args as any).requestData || { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -3992,12 +4004,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { nid, ...queryParams } = args
+      const { nid, ...otherParams } = args
       const url = `/negotiations/${nid}/test/solution`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -4026,12 +4038,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { nid, mid, ...requestData } = args
+      const { nid, mid, ...otherParams } = args
       const url = `/negotiations/${nid}/messages/${mid}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -4053,11 +4065,11 @@ mcpServer.tool(
 
 mcpServer.tool('post-negotiations-topics-read', `Mark responses as read`, {}, async (args, extra) => {
   try {
-    const requestData = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...requestData }
+    const mappedParams: any = (args as any).requestData || { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -4085,12 +4097,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { nid, ...queryParams } = args
+      const { nid, ...otherParams } = args
       const url = `/negotiations/active/${nid}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('withDeclineMessage' in mappedParams) {
         mappedParams['with_decline_message'] = mappedParams['withDeclineMessage']
         delete mappedParams['withDeclineMessage']
@@ -4122,12 +4134,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { id, ...queryParams } = args
+      const { id, ...otherParams } = args
       const url = `/negotiations/${id}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -4155,12 +4167,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { id, ...requestData } = args
+      const { id, ...otherParams } = args
       const url = `/negotiations/${id}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -4188,12 +4200,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, ...queryParams } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/${employerId}/negotiations_statistics`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -4225,12 +4237,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { nid, ...requestData } = args
+      const { nid, ...otherParams } = args
       const url = `/negotiations/${nid}/messages`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -4259,12 +4271,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { nid, ...queryParams } = args
+      const { nid, ...otherParams } = args
       const url = `/negotiations/${nid}/messages`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('withTextOnly' in mappedParams) {
         mappedParams['with_text_only'] = mappedParams['withTextOnly']
         delete mappedParams['withTextOnly']
@@ -4296,12 +4308,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { draftId, ...queryParams } = args
+      const { draftId, ...otherParams } = args
       const url = `/vacancies/drafts/${draftId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('draftId' in mappedParams) {
         mappedParams['draft_id'] = mappedParams['draftId']
         delete mappedParams['draftId']
@@ -4330,15 +4342,16 @@ mcpServer.tool(
   `Editing a vacancy draft`,
   {
     draftId: z.string(),
+    requestData: z.record(z.any()).optional(),
   },
   async (args, extra) => {
     try {
-      const { draftId, ...requestData } = args
+      const { draftId, ...otherParams } = args
       const url = `/vacancies/drafts/${draftId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('draftId' in mappedParams) {
         mappedParams['draft_id'] = mappedParams['draftId']
         delete mappedParams['draftId']
@@ -4370,12 +4383,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { draftId, ...queryParams } = args
+      const { draftId, ...otherParams } = args
       const url = `/vacancies/drafts/${draftId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('draftId' in mappedParams) {
         mappedParams['draft_id'] = mappedParams['draftId']
         delete mappedParams['draftId']
@@ -4407,12 +4420,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { draftId, ...requestData } = args
+      const { draftId, ...otherParams } = args
       const url = `/vacancies/drafts/${draftId}/publish`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('draftId' in mappedParams) {
         mappedParams['draft_id'] = mappedParams['draftId']
         delete mappedParams['draftId']
@@ -4444,12 +4457,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { draftId, ...queryParams } = args
+      const { draftId, ...otherParams } = args
       const url = `/vacancies/drafts/${draftId}/duplicates`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('draftId' in mappedParams) {
         mappedParams['draft_id'] = mappedParams['draftId']
         delete mappedParams['draftId']
@@ -4473,30 +4486,37 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool('create-vacancy-draft', `Creating vacancy draft`, {}, async (args, extra) => {
-  try {
-    const requestData = args
+mcpServer.tool(
+  'create-vacancy-draft',
+  `Creating vacancy draft`,
+  {
+    requestData: z.record(z.any()).optional(),
+  },
+  async (args, extra) => {
+    try {
+      const otherParams = args
 
-    // Map camelCase to original parameter names for API request
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...requestData }
+      // Map camelCase to original parameter names for API request
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
 
-    // Extract authorization token from HTTP request headers
-    const authorization = extra?.requestInfo?.headers?.authorization as string
-    const bearer = authorization?.replace('Bearer ', '')
+      // Extract authorization token from HTTP request headers
+      const authorization = extra?.requestInfo?.headers?.authorization as string
+      const bearer = authorization?.replace('Bearer ', '')
 
-    const response = await apiClient.request({
-      headers: bearer ? { Authorization: `Bearer ${bearer}` } : undefined,
-      method: 'POST',
-      url: '/vacancies/drafts',
-      data: mappedParams,
-    })
+      const response = await apiClient.request({
+        headers: bearer ? { Authorization: `Bearer ${bearer}` } : undefined,
+        method: 'POST',
+        url: '/vacancies/drafts',
+        data: mappedParams,
+      })
 
-    return handleResult(response.data)
-  } catch (error) {
-    return handleError(error)
+      return handleResult(response.data)
+    } catch (error) {
+      return handleError(error)
+    }
   }
-})
+)
 
 mcpServer.tool(
   'get-vacancy-draft-list',
@@ -4507,11 +4527,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('perPage' in mappedParams) {
         mappedParams['per_page'] = mappedParams['perPage']
         delete mappedParams['perPage']
@@ -4543,11 +4563,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('draftId' in mappedParams) {
         mappedParams['draft_id'] = mappedParams['draftId']
         delete mappedParams['draftId']
@@ -4576,15 +4596,16 @@ mcpServer.tool(
   `Change a subscription on notifications`,
   {
     subscriptionId: z.string(),
+    requestData: z.record(z.any()).optional(),
   },
   async (args, extra) => {
     try {
-      const { subscriptionId, ...requestData } = args
+      const { subscriptionId, ...otherParams } = args
       const url = `/webhook/subscriptions/${subscriptionId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('subscriptionId' in mappedParams) {
         mappedParams['subscription_id'] = mappedParams['subscriptionId']
         delete mappedParams['subscriptionId']
@@ -4616,12 +4637,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { subscriptionId, ...queryParams } = args
+      const { subscriptionId, ...otherParams } = args
       const url = `/webhook/subscriptions/${subscriptionId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('subscriptionId' in mappedParams) {
         mappedParams['subscription_id'] = mappedParams['subscriptionId']
         delete mappedParams['subscriptionId']
@@ -4645,30 +4666,37 @@ mcpServer.tool(
   }
 )
 
-mcpServer.tool('post-webhook-subscription', `Subscription to notifications`, {}, async (args, extra) => {
-  try {
-    const requestData = args
+mcpServer.tool(
+  'post-webhook-subscription',
+  `Subscription to notifications`,
+  {
+    requestData: z.record(z.any()).optional(),
+  },
+  async (args, extra) => {
+    try {
+      const otherParams = args
 
-    // Map camelCase to original parameter names for API request
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...requestData }
+      // Map camelCase to original parameter names for API request
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
 
-    // Extract authorization token from HTTP request headers
-    const authorization = extra?.requestInfo?.headers?.authorization as string
-    const bearer = authorization?.replace('Bearer ', '')
+      // Extract authorization token from HTTP request headers
+      const authorization = extra?.requestInfo?.headers?.authorization as string
+      const bearer = authorization?.replace('Bearer ', '')
 
-    const response = await apiClient.request({
-      headers: bearer ? { Authorization: `Bearer ${bearer}` } : undefined,
-      method: 'POST',
-      url: '/webhook/subscriptions',
-      data: mappedParams,
-    })
+      const response = await apiClient.request({
+        headers: bearer ? { Authorization: `Bearer ${bearer}` } : undefined,
+        method: 'POST',
+        url: '/webhook/subscriptions',
+        data: mappedParams,
+      })
 
-    return handleResult(response.data)
-  } catch (error) {
-    return handleError(error)
+      return handleResult(response.data)
+    } catch (error) {
+      return handleError(error)
+    }
   }
-})
+)
 
 mcpServer.tool(
   'get-webhook-subscriptions',
@@ -4676,11 +4704,11 @@ mcpServer.tool(
   {},
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -4708,12 +4736,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, ...queryParams } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/${employerId}/tests`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -4745,12 +4773,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, ...queryParams } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/${employerId}/vacancy_areas/active`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -4782,12 +4810,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, ...queryParams } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/${employerId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -4819,12 +4847,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, ...requestData } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/blacklisted/${employerId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -4856,12 +4884,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, ...queryParams } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/blacklisted/${employerId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -4899,11 +4927,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('onlyWithVacancies' in mappedParams) {
         mappedParams['only_with_vacancies'] = mappedParams['onlyWithVacancies']
         delete mappedParams['onlyWithVacancies']
@@ -4943,12 +4971,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, ...queryParams } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/${employerId}/departments`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -4980,12 +5008,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, ...queryParams } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/${employerId}/vacancy_branded_templates`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -5011,11 +5039,11 @@ mcpServer.tool(
 
 mcpServer.tool('get-blacklisted-employers', `List of hidden employers`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -5036,11 +5064,11 @@ mcpServer.tool('get-blacklisted-employers', `List of hidden employers`, {}, asyn
 
 mcpServer.tool('get-all-districts', `List of available city districts`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -5073,12 +5101,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { areaId, ...queryParams } = args
+      const { areaId, ...otherParams } = args
       const url = `/salary_statistics/paid/salary_evaluation/${areaId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('areaId' in mappedParams) {
         mappedParams['area_id'] = mappedParams['areaId']
         delete mappedParams['areaId']
@@ -5120,11 +5148,11 @@ mcpServer.tool(
 
 mcpServer.tool('get-metro-stations', `The list of metro stations in all cities`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -5151,12 +5179,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { cityId, ...queryParams } = args
+      const { cityId, ...otherParams } = args
       const url = `/metro/${cityId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('cityId' in mappedParams) {
         mappedParams['city_id'] = mappedParams['cityId']
         delete mappedParams['cityId']
@@ -5189,12 +5217,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { savedSearchId, managerId, ...requestData } = args
+      const { savedSearchId, managerId, ...otherParams } = args
       const url = `/saved_searches/resumes/${savedSearchId}/managers/${managerId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('savedSearchId' in mappedParams) {
         mappedParams['saved_search_id'] = mappedParams['savedSearchId']
         delete mappedParams['savedSearchId']
@@ -5230,12 +5258,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { vacancyId, ...queryParams } = args
+      const { vacancyId, ...otherParams } = args
       const url = `/vacancies/${vacancyId}/resumes_by_status`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('vacancyId' in mappedParams) {
         mappedParams['vacancy_id'] = mappedParams['vacancyId']
         delete mappedParams['vacancyId']
@@ -5267,12 +5295,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { resumeId, ...queryParams } = args
+      const { resumeId, ...otherParams } = args
       const url = `/resumes/${resumeId}/status`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']
@@ -5304,12 +5332,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { resumeId, ...queryParams } = args
+      const { resumeId, ...otherParams } = args
       const url = `/resumes/${resumeId}/negotiations_history`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']
@@ -5341,12 +5369,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { id, ...queryParams } = args
+      const { id, ...otherParams } = args
       const url = `/saved_searches/resumes/${id}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -5376,12 +5404,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { id, ...requestData } = args
+      const { id, ...otherParams } = args
       const url = `/saved_searches/resumes/${id}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -5409,12 +5437,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { id, ...queryParams } = args
+      const { id, ...otherParams } = args
       const url = `/saved_searches/resumes/${id}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -5439,14 +5467,15 @@ mcpServer.tool(
   `Resume creating`,
   {
     sourceResumeId: z.string().optional(),
+    requestData: z.record(z.any()).optional(),
   },
   async (args, extra) => {
     try {
-      const requestData = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('sourceResumeId' in mappedParams) {
         mappedParams['source_resume_id'] = mappedParams['sourceResumeId']
         delete mappedParams['sourceResumeId']
@@ -5526,11 +5555,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('textLogic' in mappedParams) {
         mappedParams['text.logic'] = mappedParams['textLogic']
         delete mappedParams['textLogic']
@@ -5676,11 +5705,11 @@ mcpServer.tool(
 
 mcpServer.tool('get-mine-resumes', `List of resumes for current user`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -5707,12 +5736,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { resumeId, ...requestData } = args
+      const { resumeId, ...otherParams } = args
       const url = `/resumes/${resumeId}/publish`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']
@@ -5742,11 +5771,11 @@ mcpServer.tool(
   {},
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
 
       // Extract authorization token from HTTP request headers
       const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -5774,12 +5803,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { vacancyId, ...queryParams } = args
+      const { vacancyId, ...otherParams } = args
       const url = `/vacancies/${vacancyId}/suitable_resumes`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('vacancyId' in mappedParams) {
         mappedParams['vacancy_id'] = mappedParams['vacancyId']
         delete mappedParams['vacancyId']
@@ -5811,12 +5840,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { resumeId, ...queryParams } = args
+      const { resumeId, ...otherParams } = args
       const url = `/resumes/${resumeId}/conditions`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']
@@ -5849,12 +5878,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { resumeId, ...queryParams } = args
+      const { resumeId, ...otherParams } = args
       const url = `/resumes/${resumeId}/views`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']
@@ -5893,12 +5922,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { resumeId, ...queryParams } = args
+      const { resumeId, ...otherParams } = args
       const url = `/resumes/${resumeId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']
@@ -5942,12 +5971,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { resumeId, ...queryParams } = args
+      const { resumeId, ...otherParams } = args
       const url = `/resumes/${resumeId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']
@@ -5976,15 +6005,16 @@ mcpServer.tool(
   `Resume updating`,
   {
     resumeId: z.string(),
+    requestData: z.record(z.any()).optional(),
   },
   async (args, extra) => {
     try {
-      const { resumeId, ...requestData } = args
+      const { resumeId, ...otherParams } = args
       const url = `/resumes/${resumeId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']
@@ -6010,11 +6040,11 @@ mcpServer.tool(
 
 mcpServer.tool('get-resume-creation-availability', `Availability of resume creation`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -6042,11 +6072,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('perPage' in mappedParams) {
         mappedParams['per_page'] = mappedParams['perPage']
         delete mappedParams['perPage']
@@ -6111,11 +6141,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const requestData = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('textLogic' in mappedParams) {
         mappedParams['text.logic'] = mappedParams['textLogic']
         delete mappedParams['textLogic']
@@ -6219,12 +6249,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { resumeId, ...queryParams } = args
+      const { resumeId, ...otherParams } = args
       const url = `/resumes/${resumeId}/access_types`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']
@@ -6257,12 +6287,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { applicantId, commentId, ...requestData } = args
+      const { applicantId, commentId, ...otherParams } = args
       const url = `/applicant_comments/${applicantId}/${commentId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('applicantId' in mappedParams) {
         mappedParams['applicant_id'] = mappedParams['applicantId']
         delete mappedParams['applicantId']
@@ -6299,12 +6329,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { applicantId, commentId, ...queryParams } = args
+      const { applicantId, commentId, ...otherParams } = args
       const url = `/applicant_comments/${applicantId}/${commentId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('applicantId' in mappedParams) {
         mappedParams['applicant_id'] = mappedParams['applicantId']
         delete mappedParams['applicantId']
@@ -6343,12 +6373,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { applicantId, ...queryParams } = args
+      const { applicantId, ...otherParams } = args
       const url = `/applicant_comments/${applicantId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('applicantId' in mappedParams) {
         mappedParams['applicant_id'] = mappedParams['applicantId']
         delete mappedParams['applicantId']
@@ -6388,12 +6418,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { applicantId, ...requestData } = args
+      const { applicantId, ...otherParams } = args
       const url = `/applicant_comments/${applicantId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('applicantId' in mappedParams) {
         mappedParams['applicant_id'] = mappedParams['applicantId']
         delete mappedParams['applicantId']
@@ -6423,15 +6453,16 @@ mcpServer.tool(
   {
     employerId: z.string(),
     templateId: z.string(),
+    requestData: z.record(z.any()).optional(),
   },
   async (args, extra) => {
     try {
-      const { employerId, templateId, ...requestData } = args
+      const { employerId, templateId, ...otherParams } = args
       const url = `/employers/${employerId}/mail_templates/${templateId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -6467,12 +6498,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { employerId, ...queryParams } = args
+      const { employerId, ...otherParams } = args
       const url = `/employers/${employerId}/mail_templates`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('employerId' in mappedParams) {
         mappedParams['employer_id'] = mappedParams['employerId']
         delete mappedParams['employerId']
@@ -6505,11 +6536,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('dateFrom' in mappedParams) {
         mappedParams['date_from'] = mappedParams['dateFrom']
         delete mappedParams['dateFrom']
@@ -6539,11 +6570,11 @@ mcpServer.tool(
 
 mcpServer.tool('get-countries', `Countries`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -6570,11 +6601,11 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const queryParams = args
+      const otherParams = args
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('additionalCase' in mappedParams) {
         mappedParams['additional_case'] = mappedParams['additionalCase']
         delete mappedParams['additionalCase']
@@ -6607,12 +6638,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { areaId, ...queryParams } = args
+      const { areaId, ...otherParams } = args
       const url = `/areas/${areaId}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('areaId' in mappedParams) {
         mappedParams['area_id'] = mappedParams['areaId']
         delete mappedParams['areaId']
@@ -6642,11 +6673,11 @@ mcpServer.tool(
 
 mcpServer.tool('get-salary-employee-levels', `Competency levels`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -6667,11 +6698,11 @@ mcpServer.tool('get-salary-employee-levels', `Competency levels`, {}, async (arg
 
 mcpServer.tool('get-salary-salary-areas', `Regions and cities`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -6692,11 +6723,11 @@ mcpServer.tool('get-salary-salary-areas', `Regions and cities`, {}, async (args,
 
 mcpServer.tool('get-salary-professional-areas', `Professions and specializations`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -6717,11 +6748,11 @@ mcpServer.tool('get-salary-professional-areas', `Professions and specializations
 
 mcpServer.tool('get-salary-industries', `Industries and fields of expertise`, {}, async (args, extra) => {
   try {
-    const queryParams = args
+    const otherParams = args
 
     // Map camelCase to original parameter names for API request
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mappedParams: any = { ...queryParams }
+    const mappedParams: any = { ...otherParams }
 
     // Extract authorization token from HTTP request headers
     const authorization = extra?.requestInfo?.headers?.authorization as string
@@ -6752,12 +6783,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { resumeId, listType, ...queryParams } = args
+      const { resumeId, listType, ...otherParams } = args
       const url = `/resumes/${resumeId}/${listType}/search`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']
@@ -6798,12 +6829,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { resumeId, listType, ...queryParams } = args
+      const { resumeId, listType, ...otherParams } = args
       const url = `/resumes/${resumeId}/${listType}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']
@@ -6837,15 +6868,16 @@ mcpServer.tool(
   {
     resumeId: z.string(),
     listType: z.string(),
+    requestData: z.record(z.any()).optional(),
   },
   async (args, extra) => {
     try {
-      const { resumeId, listType, ...requestData } = args
+      const { resumeId, listType, ...otherParams } = args
       const url = `/resumes/${resumeId}/${listType}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...requestData }
+      const mappedParams: any = (args as any).requestData || { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']
@@ -6882,12 +6914,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { resumeId, listType, ...queryParams } = args
+      const { resumeId, listType, ...otherParams } = args
       const url = `/resumes/${resumeId}/${listType}`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']
@@ -6925,12 +6957,12 @@ mcpServer.tool(
   },
   async (args, extra) => {
     try {
-      const { resumeId, listType, ...queryParams } = args
+      const { resumeId, listType, ...otherParams } = args
       const url = `/resumes/${resumeId}/${listType}/employer`
 
       // Map camelCase to original parameter names for API request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mappedParams: any = { ...queryParams }
+      const mappedParams: any = { ...otherParams }
       if ('resumeId' in mappedParams) {
         mappedParams['resume_id'] = mappedParams['resumeId']
         delete mappedParams['resumeId']

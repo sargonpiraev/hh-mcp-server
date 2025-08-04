@@ -49,7 +49,7 @@ npx -y @smithery/cli@latest install @sargonpiraev/hh-mcp-server --client <CLIENT
 
 #### Cursor One-Click Installation
 
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=@sargonpiraev/hh-mcp-server&config=)
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=@sargonpiraev/hh-mcp-server&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBzYXJnb25waXJhZXYvaGgtbWNwLXNlcnZlciJdLCJlbnYiOnsiSEhfQ0xJRU5UX0lEIjoieW91cl9oaF9jbGllbnRfaWRfaGVyZSIsIkhIX0NMSUVOVF9TRUNSRVQiOiJ5b3VyX2hoX2NsaWVudF9zZWNyZXRfaGVyZSIsIkhIX1VTRVJfQUdFTlQiOiJ5b3VyX2hoX3VzZXJfYWdlbnRfaGVyZSIsIkhIX1JFRElSRUNUX1VSSSI6InlvdXJfaGhfcmVkaXJlY3RfdXJpX2hlcmUifX0=)
 
 #### Manual Configuration
 
