@@ -1,0 +1,8 @@
+
+
+> @sargonpiraev/hh-mcp-server@1.0.0 format:check
+> prettier --check .
+
+[1G[0KChecking formatting...
+.editorconfig[2K[1G.env.example[2K[1G.github/workflows/ci.yml[2K[1G.gitignore[2K[1G.husky/_/.gitignore[2K[1G.husky/_/applypatch-msg[2K[1G.husky/_/commit-msg[2K[1G.husky/_/h[2K[1G.husky/_/husky.sh[2K[1G.husky/_/post-applypatch[2K[1G.husky/_/post-checkout[2K[1G.husky/_/post-commit[2K[1G.husky/_/post-merge[2K[1G.husky/_/post-rewrite[2K[1G.husky/_/pre-applypatch[2K[1G.husky/_/pre-auto-gc[2K[1G.husky/_/pre-commit[2K[1G.husky/_/pre-merge-commit[2K[1G.husky/_/pre-push[2K[1G.husky/_/pre-rebase[2K[1G.husky/_/prepare-commit-msg[2K[1G.husky/commit-msg[2K[1G.husky/pre-commit[2K[1G.npmrc.example[2K[1G.prettierrc.json[2K[1G.releaserc.json[2K[1G.turbo/turbo-format.log[2K[1G.turbo/turbo-format$colon$check.log[2K[1G.turbo/turbo-lint.log[2K[1Gcommitlint.config.ts[2K[1GCONTRIBUTING.md[2K[1Geslint.config.ts[2K[1Gjest.config.ts[2K[1GLICENSE[2K[1Gmcp.json[2K[1Gpackage-lock.json[2K[1Gpackage.json[2K[1GREADME.md[2K[1Gsrc/main.ts[2K[1Gsrc/server.ts[2K[1Gtsconfig.json[2K[1GAll matched files use Prettier code style!
+[1G[0K⠙[1G[0K

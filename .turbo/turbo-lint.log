@@ -1,0 +1,6 @@
+
+
+> @sargonpiraev/hh-mcp-server@1.0.0 lint
+> eslint ./src --ext .ts
+
+[1G[0K
